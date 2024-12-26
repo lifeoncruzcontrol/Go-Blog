@@ -12,14 +12,23 @@ import (
 
 type post struct {
 	ID     uuid.UUID `json:"id"`
-	UserId uuid.UUID `json:"userid"`
+	UserId int       `json:"userid"`
 	Text   string    `json:"text"`
 	Date   time.Time `json:"date"`
 }
 
 type user struct {
-	UserId uuid.UUID `json:"id"`
-	Name   string    `json:"name"`
+	UserId int    `json:"id"`
+	Name   string `json:"name"`
+}
+
+// Initialize an empty slice of posts
+var posts []post
+
+var users = []user{
+	{UserId: 0, Name: "Joe"},
+	{UserId: 1, Name: "Meribeth"},
+	{UserId: 2, Name: "Janice"},
 }
 
 func main() {
