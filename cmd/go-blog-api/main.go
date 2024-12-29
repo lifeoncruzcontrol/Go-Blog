@@ -29,6 +29,11 @@ var newUserId int = 0
 
 var users = []user{}
 
+func getUsersHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	newUser, err := createUserHandlerInternal(r)
 	if err != nil {
@@ -61,6 +66,8 @@ func main() {
 		switch r.Method {
 		case http.MethodPost:
 			createUserHandler(w, r)
+		case http.MethodGet:
+			getUsersHandler(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
