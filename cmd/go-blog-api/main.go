@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
-
-	"time"
 )
 
 type post struct {
@@ -25,16 +25,43 @@ type user struct {
 // Initialize an empty slice of posts
 var posts []post
 
-var users = []user{
-	{UserId: 0, Name: "Joe"},
-	{UserId: 1, Name: "Meribeth"},
-	{UserId: 2, Name: "Janice"},
+var newUserId int = 0
+
+var users = []user{}
+
+func createUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	newUser, err := createUserHandlerInternal(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(newUser)
+}
+
+func createUserHandlerInternal(r *http.Request) (user, error) {
+	var newUser user
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&newUser); err != nil {
+		log.Fatal(err)
+		return user{}, err
+	}
+	newUser.UserId = newUserId
+	newUserId++
+	users = append(users, newUser)
+	return newUser, nil
 }
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, you have requested: %s\n", r.URL.Path)
 	})
+
+	http.HandleFunc("/users", createUserHandler)
 
 	http.ListenAndServe(":8080", nil)
 }
