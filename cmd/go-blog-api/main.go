@@ -30,10 +30,6 @@ var newUserId int = 0
 var users = []user{}
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	newUser, err := createUserHandlerInternal(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -61,7 +57,14 @@ func main() {
 		fmt.Fprintf(w, "Hello, you have requested: %s\n", r.URL.Path)
 	})
 
-	http.HandleFunc("/users", createUserHandler)
+	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			createUserHandler(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	})
 
 	http.ListenAndServe(":8080", nil)
 }
