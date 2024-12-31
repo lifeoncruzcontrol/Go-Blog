@@ -59,6 +59,10 @@ func createUserHandlerInternal(r *http.Request) (user, error) {
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
@@ -74,6 +78,7 @@ func main() {
 			getUsersHandler(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
 		}
 	})
 
