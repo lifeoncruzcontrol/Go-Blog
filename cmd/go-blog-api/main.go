@@ -60,6 +60,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodPost)
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
@@ -77,6 +78,8 @@ func main() {
 		case http.MethodGet:
 			getUsersHandler(w, r)
 		default:
+			w.Header().Set("Allow", http.MethodPost)
+			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
