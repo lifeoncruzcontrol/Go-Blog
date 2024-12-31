@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -60,7 +59,11 @@ func createUserHandlerInternal(r *http.Request) (user, error) {
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, you have requested: %s\n", r.URL.Path)
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Write([]byte("Hello world"))
 	})
 
 	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
