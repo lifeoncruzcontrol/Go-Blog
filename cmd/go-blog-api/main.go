@@ -16,12 +16,34 @@ type post struct {
 	Datetime time.Time `json:"datetime"`
 }
 
-// Initialize an empty slice of posts
-var posts = []post{}
+var postsMap map[string]post
 
 func getAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+	var posts []post // Create a new slice for easier encoding
+	for _, p := range postsMap {
+		posts = append(posts, p)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
+}
+
+func getPostByIDHandler(w http.ResponseWriter, r *http.Request) {
+	vars := r.URL.Query()
+	id := vars.Get("id")
+	if id == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	post, exists := postsMap[id]
+
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
 }
 
 func createPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,11 +65,12 @@ func createPostHandlerInternal(r *http.Request) (post, error) {
 	}
 	newPost.ID = uuid.New()
 	newPost.Datetime = time.Now()
-	posts = append(posts, newPost)
+	postsMap[newPost.ID.String()] = newPost
 	return newPost, nil
 }
 
 func main() {
+	postsMap = make(map[string]post)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -67,7 +90,13 @@ func main() {
 		case http.MethodPost:
 			createPostHandler(w, r)
 		case http.MethodGet:
-			getAllPostsHandler(w, r)
+			vars := r.URL.Query()
+			id := vars.Get("id")
+			if id != "" {
+				getPostByIDHandler(w, r)
+			} else {
+				getAllPostsHandler(w, r)
+			}
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
