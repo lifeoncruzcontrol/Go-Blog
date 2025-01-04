@@ -10,50 +10,41 @@ import (
 )
 
 type post struct {
-	ID     uuid.UUID `json:"id"`
-	UserId int       `json:"userid"`
-	Text   string    `json:"text"`
-	Date   time.Time `json:"date"`
-}
-
-type user struct {
-	UserId int    `json:"id"`
-	Name   string `json:"name"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"Username"`
+	Text     string    `json:"text"`
+	Datetime time.Time `json:"datetime"`
 }
 
 // Initialize an empty slice of posts
-var posts []post
+var posts = []post{}
 
-var newUserId int = 0
-
-var users = []user{}
-
-func getUsersHandler(w http.ResponseWriter, r *http.Request) {
+func getAllPostsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(posts)
 }
 
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	newUser, err := createUserHandlerInternal(r)
+func createPostHandler(w http.ResponseWriter, r *http.Request) {
+	newPost, err := createPostHandlerInternal(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newUser)
+	json.NewEncoder(w).Encode(newPost)
 }
 
-func createUserHandlerInternal(r *http.Request) (user, error) {
-	var newUser user
+func createPostHandlerInternal(r *http.Request) (post, error) {
+	var newPost post
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&newUser); err != nil {
+	if err := decoder.Decode(&newPost); err != nil {
 		log.Fatal(err)
-		return user{}, err
+		return post{}, err
 	}
-	newUser.UserId = newUserId
-	newUserId++
-	users = append(users, newUser)
-	return newUser, nil
+	newPost.ID = uuid.New()
+	newPost.Datetime = time.Now()
+	posts = append(posts, newPost)
+	return newPost, nil
 }
 
 func main() {
@@ -71,12 +62,12 @@ func main() {
 		w.Write([]byte("Hello world"))
 	})
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			createUserHandler(w, r)
+			createPostHandler(w, r)
 		case http.MethodGet:
-			getUsersHandler(w, r)
+			getAllPostsHandler(w, r)
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
