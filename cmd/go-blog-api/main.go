@@ -3,19 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/google/uuid"
 )
-
-type post struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"Username"`
-	Text     string    `json:"text"`
-	Datetime time.Time `json:"datetime"`
-}
-
-var postsMap map[string]post
 
 func main() {
 	postsMap = make(map[string]post)
