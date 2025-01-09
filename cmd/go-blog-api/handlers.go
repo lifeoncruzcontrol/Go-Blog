@@ -69,7 +69,7 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	post, err := postsMap[id]
 	if !err {
-		http.NotFound(w, r)
+		http.Error(w, "Post not found for that ID", http.StatusInternalServerError)
 		return
 	}
 	var updatedText updateText
@@ -82,8 +82,4 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 	postsMap[id] = post
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
-}
-
-func deletePostByIdHandler(w http.ResponseWriter, r *http.Request) {
-
 }
