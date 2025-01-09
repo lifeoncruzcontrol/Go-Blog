@@ -19,10 +19,10 @@ func getAllPostsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPostByIDHandler(w http.ResponseWriter, r *http.Request) {
-	vars := r.URL.Query()
-	id := vars.Get("id")
+	urlVars := r.URL.Query()
+	id := urlVars.Get("id")
 	if id == "" {
-		http.NotFound(w, r)
+		http.Error(w, "ID missing", http.StatusInternalServerError)
 		return
 	}
 
@@ -58,4 +58,28 @@ func createPostHandlerInternal(r *http.Request) (post, error) {
 	newPost.Datetime = time.Now()
 	postsMap[newPost.ID.String()] = newPost
 	return newPost, nil
+}
+
+func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
+	urlVars := r.URL.Query()
+	id := urlVars.Get("id")
+	if id == "" {
+		http.Error(w, "ID missing", http.StatusInternalServerError)
+		return
+	}
+	post, err := postsMap[id]
+	if !err {
+		http.NotFound(w, r)
+		return
+	}
+	var updatedText updateText
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&updatedText); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	post.Text = updatedText.Text
+	postsMap[id] = post
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
 }
