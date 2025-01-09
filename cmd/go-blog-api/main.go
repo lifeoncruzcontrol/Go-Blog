@@ -31,10 +31,12 @@ func main() {
 			if id != "" {
 				getPostByIDHandler(w, r)
 			} else {
-				getAllPostsHandler(w, r)
+				getAllPostsHandler(w)
 			}
 		case http.MethodPatch:
 			patchTextByIdHandler(w, r)
+		case http.MethodDelete:
+			deletePostByIdHandler(w, r)
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
