@@ -12,3 +12,7 @@ type post struct {
 	Text     string    `json:"text"`
 	Datetime time.Time `json:"datetime"`
 }
+
+type updateText struct {
+	Text string `json:text`
+}
