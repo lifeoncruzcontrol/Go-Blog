@@ -14,5 +14,5 @@ type post struct {
 }
 
 type updateText struct {
-	Text string `json:text`
+	Text string `json:"text"`
 }
