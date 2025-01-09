@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func getAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+func getAllPostsHandler(w http.ResponseWriter) {
 	var posts []post // Create a new slice for easier encoding
 	for _, p := range postsMap {
 		posts = append(posts, p)
@@ -22,14 +22,14 @@ func getPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 	urlVars := r.URL.Query()
 	id := urlVars.Get("id")
 	if id == "" {
-		http.Error(w, "ID missing", http.StatusInternalServerError)
+		http.Error(w, "ID missing", http.StatusBadRequest)
 		return
 	}
 
 	post, exists := postsMap[id]
 
 	if !exists {
-		http.NotFound(w, r)
+		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
 
@@ -64,12 +64,12 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 	urlVars := r.URL.Query()
 	id := urlVars.Get("id")
 	if id == "" {
-		http.Error(w, "ID missing", http.StatusInternalServerError)
+		http.Error(w, "ID missing", http.StatusBadRequest)
 		return
 	}
-	post, err := postsMap[id]
-	if !err {
-		http.Error(w, "Post not found for that ID", http.StatusInternalServerError)
+	post, exist := postsMap[id]
+	if !exist {
+		http.Error(w, "Post does not exist for that ID", http.StatusNotFound)
 		return
 	}
 	var updatedText updateText
@@ -82,4 +82,21 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 	postsMap[id] = post
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
+}
+
+func deletePostByIdHandler(w http.ResponseWriter, r *http.Request) {
+	urlVars := r.URL.Query()
+	id := urlVars.Get("id")
+	if id == "" {
+		http.Error(w, "ID missing", http.StatusBadRequest)
+		return
+	}
+	_, exist := postsMap[id]
+
+	if !exist {
+		http.Error(w, "Post does not exist for that ID", http.StatusNotFound)
+		return
+	}
+	delete(postsMap, id)
+	w.WriteHeader(http.StatusNoContent)
 }
