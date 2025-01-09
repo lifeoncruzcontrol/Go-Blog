@@ -26,13 +26,15 @@ func main() {
 		case http.MethodPost:
 			createPostHandler(w, r)
 		case http.MethodGet:
-			vars := r.URL.Query()
-			id := vars.Get("id")
+			urlVars := r.URL.Query()
+			id := urlVars.Get("id")
 			if id != "" {
 				getPostByIDHandler(w, r)
 			} else {
 				getAllPostsHandler(w, r)
 			}
+		case http.MethodPatch:
+			patchTextByIdHandler(w, r)
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
