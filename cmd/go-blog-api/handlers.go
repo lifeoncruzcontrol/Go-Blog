@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"go-blog-api/utils"
 )
 
 func getAllPostsHandler(w http.ResponseWriter) {
@@ -49,8 +51,7 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func createPostHandlerInternal(r *http.Request) (post, error) {
 	var newPost post
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&newPost); err != nil {
+	if err := utils.DecodeJSON(r, &newPost); err != nil {
 		log.Fatal(err)
 		return post{}, err
 	}
@@ -73,8 +74,7 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var updatedText updateText
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&updatedText); err != nil {
+	if err := utils.DecodeJSON(r, &updatedText); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
