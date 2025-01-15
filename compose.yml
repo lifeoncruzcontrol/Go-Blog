@@ -1,5 +1,5 @@
 services:
-  mongodb:
+  db:
     image: mongo
     container_name: mongodb-container
     ports:
@@ -15,7 +15,7 @@ services:
     ports:
       - "${APP_PORT}:8080"
     depends_on:
-      - mongodb
+      - db
     environment:
       - MONGO_URI=${MONGO_URI}
     networks:
