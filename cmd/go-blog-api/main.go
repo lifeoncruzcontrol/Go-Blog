@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"go-blog-api/entities"
+	"go-blog-api/handlers"
+	"go-blog-api/storage"
 )
 
 func main() {
-	postsMap = make(map[string]entities.Post)
+	storage.PostsMap = make(map[string]entities.Post)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -26,19 +28,19 @@ func main() {
 	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			createPostHandler(w, r)
+			handlers.CreatePostHandler(w, r)
 		case http.MethodGet:
 			urlVars := r.URL.Query()
 			id := urlVars.Get("id")
 			if id != "" {
-				getPostByIDHandler(w, r)
+				handlers.GetPostByIDHandler(w, r)
 			} else {
-				getAllPostsHandler(w)
+				handlers.GetAllPostsHandler(w)
 			}
 		case http.MethodPatch:
-			patchTextByIdHandler(w, r)
+			handlers.PatchTextByIdHandler(w, r)
 		case http.MethodDelete:
-			deletePostByIdHandler(w, r)
+			handlers.DeletePostByIdHandler(w, r)
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
