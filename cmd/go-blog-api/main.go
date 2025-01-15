@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"go-blog-api/entities"
 	"go-blog-api/handlers"
@@ -10,6 +11,11 @@ import (
 )
 
 func main() {
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		log.Fatal("Missing MONGO_URI variable")
+		return
+	}
 	storage.PostsMap = make(map[string]entities.Post)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
