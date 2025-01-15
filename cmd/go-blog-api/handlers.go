@@ -8,11 +8,12 @@ import (
 
 	"github.com/google/uuid"
 
+	"go-blog-api/entities"
 	"go-blog-api/utils"
 )
 
 func getAllPostsHandler(w http.ResponseWriter) {
-	var posts []post // Create a new slice for easier encoding
+	var posts []entities.Post // Create a new slice for easier encoding
 	for _, p := range postsMap {
 		posts = append(posts, p)
 	}
@@ -49,11 +50,11 @@ func createPostHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newPost)
 }
 
-func createPostHandlerInternal(r *http.Request) (post, error) {
-	var newPost post
+func createPostHandlerInternal(r *http.Request) (entities.Post, error) {
+	var newPost entities.Post
 	if err := utils.DecodeJSON(r, &newPost); err != nil {
 		log.Fatal(err)
-		return post{}, err
+		return entities.Post{}, err
 	}
 	newPost.ID = uuid.New()
 	newPost.Datetime = time.Now()
@@ -73,7 +74,7 @@ func patchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Post does not exist for that ID", http.StatusNotFound)
 		return
 	}
-	var updatedText updateText
+	var updatedText entities.UpdateText
 	if err := utils.DecodeJSON(r, &updatedText); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

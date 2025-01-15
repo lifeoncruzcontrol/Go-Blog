@@ -1,3 +1,7 @@
 package main
 
-var postsMap map[string]post
+import (
+	"go-blog-api/entities"
+)
+
+var postsMap map[string]entities.Post

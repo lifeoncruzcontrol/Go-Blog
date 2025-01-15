@@ -3,10 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"go-blog-api/entities"
 )
 
 func main() {
-	postsMap = make(map[string]post)
+	postsMap = make(map[string]entities.Post)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
