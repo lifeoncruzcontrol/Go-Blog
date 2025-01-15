@@ -13,11 +13,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:8080"
     depends_on:
       - mongodb
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/mydatabase
+      - MONGO_URI=${MONGO_URI}
     networks:
       - go-blog-network
 
