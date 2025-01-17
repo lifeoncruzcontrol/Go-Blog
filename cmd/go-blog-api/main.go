@@ -26,13 +26,14 @@ func main() {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		log.Fatal("Error connecting to database")
+		log.Fatal("Error connecting to database: ", err)
 		return
 	}
 
 	defer func() {
 		if err := client.Disconnect(ctx); err != nil {
-			panic(err)
+			log.Fatal("Error while disconnecting client: ", err)
+			return
 		}
 	}()
 	storage.PostsMap = make(map[string]entities.Post)
