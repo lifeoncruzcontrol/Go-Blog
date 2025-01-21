@@ -13,6 +13,11 @@ type Post struct {
 	Datetime time.Time `json:"datetime"`
 }
 
+type PostResponse struct {
+	ID       interface{} `json:"id"`
+	Datetime time.Time   `json:"datetime"`
+}
+
 type UpdateText struct {
 	Text string `json:"text"`
 }
