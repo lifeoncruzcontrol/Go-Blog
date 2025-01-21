@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
-
+	"go-blog-api/db"
 	"go-blog-api/entities"
 	"go-blog-api/storage"
 	"go-blog-api/utils"
@@ -42,25 +42,35 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	newPost, err := CreatePostHandlerInternal(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newPost)
-}
-
-func CreatePostHandlerInternal(r *http.Request) (entities.Post, error) {
 	var newPost entities.Post
 	if err := utils.DecodeJSON(r, &newPost); err != nil {
-		log.Fatal(err)
-		return entities.Post{}, err
+		log.Printf("Error decoding JSON: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
 	}
-	newPost.ID = uuid.New()
 	newPost.Datetime = time.Now()
-	storage.PostsMap[newPost.ID.String()] = newPost
-	return newPost, nil
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	doc, err := db.Posts.InsertOne(ctx, newPost)
+	if err != nil {
+		log.Printf("Error saving new post to database: %v", err)
+		http.Error(w, "Failed to save post", http.StatusInternalServerError)
+		return
+	}
+	res := entities.PostResponse{
+		ID:       doc.InsertedID,
+		Datetime: newPost.Datetime,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	// Encode and send the newPost result back to the client
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log any JSON encoding error
+		log.Printf("Error encoding response: %v", err)
+
+		// Return a 500 error if response encoding fails
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
 func PatchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
