@@ -25,10 +25,10 @@ func init() {
 		return
 	}
 
-	Ctx, Cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	Ctx, Cancel = context.WithTimeout(context.Background(), 20*time.Second)
 
 	var err error
-	Client, err = mongo.Connect(Ctx, options.Client().ApplyURI(MongoURI))
+	Client, err = mongo.Connect(Ctx, options.Client().ApplyURI(MongoURI).SetMaxPoolSize(50))
 	if err != nil {
 		log.Fatal("Error connecting to database")
 		Cancel()
