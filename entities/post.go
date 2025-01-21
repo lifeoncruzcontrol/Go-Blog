@@ -1,4 +1,4 @@
-package main
+package entities
 
 import (
 	"time"
@@ -6,13 +6,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type post struct {
+type Post struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"Username"`
 	Text     string    `json:"text"`
 	Datetime time.Time `json:"datetime"`
 }
 
-type updateText struct {
+type PostResponse struct {
+	ID       interface{} `json:"id"`
+	Datetime time.Time   `json:"datetime"`
+}
+
+type UpdateText struct {
 	Text string `json:"text"`
 }
