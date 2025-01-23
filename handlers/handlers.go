@@ -9,7 +9,6 @@ import (
 
 	"go-blog-api/db"
 	"go-blog-api/entities"
-	"go-blog-api/storage"
 	"go-blog-api/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,12 +17,37 @@ import (
 )
 
 func GetAllPostsHandler(w http.ResponseWriter) {
-	var posts []entities.Post // Create a new slice for easier encoding
-	for _, p := range storage.PostsMap {
-		posts = append(posts, p)
+	// Create new context
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Create a cursor
+	cursor, err := db.Posts.Find(ctx, bson.M{})
+	if err != nil {
+		log.Printf("Error creating cursor: %v", err)
+		http.Error(w, "Error creating cursor", http.StatusInternalServerError)
+		return
 	}
+	defer cursor.Close(ctx)
+
+	// Decode the posts into a pointer pointing to a slice of Posts
+	var posts []entities.Post
+	if err = cursor.All(ctx, &posts); err != nil {
+		log.Printf("Failed to decode posts: %v", err)
+		http.Error(w, "Failed to decode posts", http.StatusInternalServerError)
+		return
+	}
+
+	// Encode posts array and send back to client
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		// Log any JSON encoding error
+		log.Printf("Error encoding response: %v", err)
+
+		// Return a 500 error if posts encoding fails
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
