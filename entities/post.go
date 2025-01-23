@@ -3,14 +3,14 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Post struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"Username"`
-	Text     string    `json:"text"`
-	Datetime time.Time `json:"datetime"`
+	ID       primitive.ObjectID `json:"id" bson:"_id"`
+	Username string             `json:"Username"`
+	Text     string             `json:"text"`
+	Datetime time.Time          `json:"datetime"`
 }
 
 type PostResponse struct {
