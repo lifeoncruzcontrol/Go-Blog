@@ -46,8 +46,8 @@ func main() {
 			} else {
 				handlers.GetAllPostsHandler(w)
 			}
-		// case http.MethodPatch:
-		// 	handlers.PatchTextByIdHandler(w, r)
+		case http.MethodPatch:
+			handlers.PatchTextByIdHandler(w, r)
 		// case http.MethodDelete:
 		// 	handlers.DeletePostByIdHandler(w, r)
 		default:
