@@ -135,6 +135,52 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PatchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
+	urlVars := r.URL.Query()
+	id := urlVars.Get("id")
+	if id == "" {
+		http.Error(w, "ID missing", http.StatusBadRequest)
+		return
+	}
+
+	var updatedText entities.UpdateText
+	if err := utils.DecodeJSON(r, &updatedText); err != nil {
+		http.Error(w, "Error updating post text", http.StatusInternalServerError)
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid ID format", http.StatusBadRequest)
+		return
+	}
+
+	filter := bson.D{{Key: "_id", Value: objectID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "text", Value: updatedText.Text}}}}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := db.Posts.UpdateOne(ctx, filter, update)
+	if err != nil {
+		http.Error(w, "Error updating post text", http.StatusInternalServerError)
+		return
+	}
+
+	// Check if any document was modified
+	if result.ModifiedCount == 0 {
+		http.Error(w, "No document found with the given ID", http.StatusNotFound)
+		return
+	}
+
+	// Send the success response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Document updated successfully",
+		"updated": result.ModifiedCount,
+	})
+}
+
 // func PatchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 // 	urlVars := r.URL.Query()
 // 	id := urlVars.Get("id")
