@@ -48,8 +48,8 @@ func main() {
 			}
 		case http.MethodPatch:
 			handlers.PatchTextByIdHandler(w, r)
-		// case http.MethodDelete:
-		// 	handlers.DeletePostByIdHandler(w, r)
+		case http.MethodDelete:
+			handlers.DeletePostByIdHandler(w, r)
 		default:
 			w.Header().Set("Allow", http.MethodPost)
 			w.Header().Set("Allow", http.MethodGet)
