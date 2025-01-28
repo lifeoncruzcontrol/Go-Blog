@@ -181,42 +181,38 @@ func PatchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// func PatchTextByIdHandler(w http.ResponseWriter, r *http.Request) {
-// 	urlVars := r.URL.Query()
-// 	id := urlVars.Get("id")
-// 	if id == "" {
-// 		http.Error(w, "ID missing", http.StatusBadRequest)
-// 		return
-// 	}
-// 	post, exist := storage.PostsMap[id]
-// 	if !exist {
-// 		http.Error(w, "Post does not exist for that ID", http.StatusNotFound)
-// 		return
-// 	}
-// 	var updatedText entities.UpdateText
-// 	if err := utils.DecodeJSON(r, &updatedText); err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-// 	post.Text = updatedText.Text
-// 	storage.PostsMap[id] = post
-// 	w.Header().Set("Content-Type", "application/json")
-// 	json.NewEncoder(w).Encode(post)
-// }
+func DeletePostByIdHandler(w http.ResponseWriter, r *http.Request) {
+	urlVars := r.URL.Query()
+	id := urlVars.Get("id")
+	if id == "" {
+		http.Error(w, "ID missing", http.StatusBadRequest)
+		return
+	}
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid ID format", http.StatusBadRequest)
+		return
+	}
 
-// func DeletePostByIdHandler(w http.ResponseWriter, r *http.Request) {
-// 	urlVars := r.URL.Query()
-// 	id := urlVars.Get("id")
-// 	if id == "" {
-// 		http.Error(w, "ID missing", http.StatusBadRequest)
-// 		return
-// 	}
-// 	_, exist := storage.PostsMap[id]
+	filter := bson.D{{Key: "_id", Value: objectID}}
 
-// 	if !exist {
-// 		http.Error(w, "Post does not exist for that ID", http.StatusNotFound)
-// 		return
-// 	}
-// 	delete(storage.PostsMap, id)
-// 	w.WriteHeader(http.StatusNoContent)
-// }
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := db.Posts.DeleteOne(ctx, filter)
+	if err != nil {
+		http.Error(w, "Error deleting post for provided ID", http.StatusInternalServerError)
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		http.Error(w, "No document found for given ID", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Document deleted successfully",
+		"updated": result.DeletedCount,
+	})
+}
