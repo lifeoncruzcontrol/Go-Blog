@@ -5,9 +5,7 @@ import (
 	"net/http"
 
 	"go-blog-api/db"
-	"go-blog-api/entities"
 	"go-blog-api/handlers"
-	"go-blog-api/storage"
 )
 
 func main() {
@@ -19,7 +17,6 @@ func main() {
 		log.Println("Shutdown cleanup complete")
 	}()
 
-	storage.PostsMap = make(map[string]entities.Post)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
