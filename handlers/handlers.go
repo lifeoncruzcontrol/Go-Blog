@@ -104,6 +104,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Initialize the ID field with a new ObjectID
 	newPost.ID = primitive.NewObjectID()
 	newPost.Datetime = time.Now()
+
+	// Ensure Tags field is initialized to an empty slice if nil
+	if newPost.Tags == nil {
+		newPost.Tags = []string{}
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	doc, err := db.Posts.InsertOne(ctx, newPost)
@@ -122,6 +128,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	res := entities.PostResponse{
 		ID:       insertedID.Hex(),
 		Datetime: newPost.Datetime,
+		Tags:     newPost.Tags,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	// Encode and send the newPost result back to the client
