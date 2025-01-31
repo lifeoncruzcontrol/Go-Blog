@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func GetAllPostsHandler(w http.ResponseWriter) {
@@ -45,6 +46,44 @@ func GetAllPostsHandler(w http.ResponseWriter) {
 		log.Printf("Error encoding response: %v", err)
 
 		// Return a 500 error if posts encoding fails
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
+func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request, req entities.TagsRequest) {
+	tags := req.Tags
+
+	filter := bson.M{"tags": bson.M{"$in": tags}}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opts := options.Find()
+
+	cursor, err := db.Posts.Find(ctx, filter, opts)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			log.Printf("Posts not found for tags")
+			http.Error(w, "Posts not found", http.StatusNotFound)
+		} else {
+			log.Printf("Error querying post: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
+		return
+	}
+	defer cursor.Close(ctx)
+	var results []entities.Post
+	if err = cursor.All(ctx, &results); err != nil {
+		log.Printf("Error decoding documents into results: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(results); err != nil {
+		// Log any JSON encoding error
+		log.Printf("Error encoding response: %v", err)
+
+		// Return a 500 error if response encoding fails
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
