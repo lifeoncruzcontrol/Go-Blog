@@ -62,13 +62,8 @@ func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request, req entities.T
 
 	cursor, err := db.Posts.Find(ctx, filter, opts)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			log.Printf("Posts not found for tags")
-			http.Error(w, "Posts not found", http.StatusNotFound)
-		} else {
-			log.Printf("Error querying post: %v", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-		}
+		log.Printf("Error querying post: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer cursor.Close(ctx)
@@ -76,6 +71,11 @@ func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request, req entities.T
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Printf("Error decoding documents into results: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	// If no documents are found, return a 204 No Content status
+	if len(results) == 0 {
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
