@@ -54,7 +54,7 @@ func GetAllPostsHandler(w http.ResponseWriter) {
 func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request, req entities.TagsRequest) {
 	tags := req.Tags
 
-	filter := bson.M{"tags": bson.M{"$in": tags}}
+	filter := bson.M{"tags": bson.M{"$all": tags}}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
