@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"go-blog-api/db"
+	"go-blog-api/entities"
 	"go-blog-api/handlers"
+	"go-blog-api/utils"
 )
 
 func main() {
@@ -36,13 +38,25 @@ func main() {
 		case http.MethodPost:
 			handlers.CreatePostHandler(w, r)
 		case http.MethodGet:
-			urlVars := r.URL.Query()
-			id := urlVars.Get("id")
+			// Check if it's a request for a specific post by ID
+			id := r.URL.Query().Get("id")
 			if id != "" {
 				handlers.GetPostByIDHandler(w, r)
-			} else {
-				handlers.GetAllPostsHandler(w)
+				return
 			}
+
+			// If there are no query parameters for ID, check for the tags array in the body
+			var req entities.TagsRequest
+
+			// Attempt to parse the JSON body to check for tags
+			if err := utils.DecodeJSON(r, &req); err == nil && len(req.Tags) > 0 {
+				// If tags are provided, call the GetPostByTagsHandler
+				handlers.GetPostByTagsHandler(w, r, req)
+				return
+			}
+
+			// If neither ID nor tags are provided, retrieve all posts
+			handlers.GetAllPostsHandler(w)
 		case http.MethodPatch:
 			handlers.PatchTextByIdHandler(w, r)
 		case http.MethodDelete:
