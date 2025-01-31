@@ -23,3 +23,7 @@ type PostResponse struct {
 type UpdateText struct {
 	Text string `json:"text"`
 }
+
+type TagsRequest struct {
+	Tags []string `json:"tags"`
+}
