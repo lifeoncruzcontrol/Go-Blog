@@ -43,9 +43,9 @@ func main() {
 				return
 			}
 
-			tags := r.URL.Query().Get("tags")
-			if tags == "true" {
-				handlers.GetPostByTagsHandler(w, r)
+			filter := r.URL.Query().Get("filter")
+			if filter == "true" {
+				handlers.FilterPostsHandler(w, r)
 				return
 			}
 

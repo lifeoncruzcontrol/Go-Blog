@@ -25,6 +25,7 @@ type UpdateText struct {
 	Text string `json:"text"`
 }
 
-type TagsRequest struct {
-	Tags []string `json:"tags"`
+type FilterRequest struct {
+	Tags      []string `json:"tags"`
+	Usernames []string `json:"usernames"`
 }
