@@ -52,7 +52,22 @@ func GetAllPostsHandler(w http.ResponseWriter) {
 	}
 }
 
-func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request, req entities.TagsRequest) {
+func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request) {
+	var req entities.TagsRequest
+
+	// Attempt to parse the JSON body to check for tags
+	if err := utils.DecodeJSON(r, &req); err != nil {
+		log.Printf("Error decoding response body: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if len(req.Tags) == 0 {
+		log.Printf("Tags required for filtering by tags")
+		http.Error(w, "Missing tags", http.StatusBadRequest)
+		return
+	}
+
 	tags := req.Tags
 
 	filter := bson.M{"tags": bson.M{"$all": tags}}

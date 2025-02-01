@@ -5,9 +5,7 @@ import (
 	"net/http"
 
 	"go-blog-api/db"
-	"go-blog-api/entities"
 	"go-blog-api/handlers"
-	"go-blog-api/utils"
 )
 
 func main() {
@@ -45,13 +43,9 @@ func main() {
 				return
 			}
 
-			// If there are no query parameters for ID, check for the tags array in the body
-			var req entities.TagsRequest
-
-			// Attempt to parse the JSON body to check for tags
-			if err := utils.DecodeJSON(r, &req); err == nil && len(req.Tags) > 0 {
-				// If tags are provided, call the GetPostByTagsHandler
-				handlers.GetPostByTagsHandler(w, r, req)
+			tags := r.URL.Query().Get("tags")
+			if tags == "true" {
+				handlers.GetPostByTagsHandler(w, r)
 				return
 			}
 
