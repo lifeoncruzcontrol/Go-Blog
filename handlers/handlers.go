@@ -44,6 +44,23 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		conditions = append(conditions, bson.M{"username": bson.M{"$in": usernames}})
 	}
 
+	// Set page limit (default 10)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+
+	// Handle cursor pagination
+	if req.LastID != "" {
+		lastObjectID, err := primitive.ObjectIDFromHex(req.LastID)
+		if err != nil {
+			log.Printf("Error converting ID to valid hex format: %v", err)
+			http.Error(w, "Invalid ID format", http.StatusBadRequest)
+			return
+		}
+		conditions = append(conditions, bson.M{"_id": bson.M{"$gt": lastObjectID}})
+	}
+
 	var filter bson.M
 	if len(conditions) > 0 {
 		filter = bson.M{"$and": conditions}
@@ -54,7 +71,7 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	opts := options.Find()
+	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.M{"_id": 1})
 
 	cursor, err := db.Posts.Find(ctx, filter, opts)
 	if err != nil {
@@ -77,8 +94,23 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Determine next cursor (last document's _id)
+	var nextCursor string
+	if len(results) > 0 {
+		lastDoc := results[len(results)-1]
+		nextCursor = lastDoc.ID.Hex()
+	}
+
+	res := map[string]interface{}{
+		"data": results,
+		"pagination": map[string]interface{}{
+			"limit":      limit,
+			"nextCursor": nextCursor,
+		},
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(results); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		// Log any JSON encoding error
 		log.Printf("Error encoding response: %v", err)
 
@@ -99,6 +131,7 @@ func GetPostByIDHandler(w http.ResponseWriter, r *http.Request) {
 	// Validate if the provided ID is in a valid hex format for MongoDB ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
+		log.Printf("Error converting ID to valid hex format: %v", err)
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
