@@ -18,58 +18,37 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetAllPostsHandler(w http.ResponseWriter) {
-	// Create new context
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Create a cursor
-	cursor, err := db.Posts.Find(ctx, bson.M{})
-	if err != nil {
-		log.Printf("Error creating cursor: %v", err)
-		http.Error(w, "Error creating cursor", http.StatusInternalServerError)
-		return
-	}
-	defer cursor.Close(ctx)
-
-	// Decode the posts into a pointer pointing to a slice of Posts
-	var posts []entities.Post
-	if err = cursor.All(ctx, &posts); err != nil {
-		log.Printf("Failed to decode posts: %v", err)
-		http.Error(w, "Failed to decode posts", http.StatusInternalServerError)
-		return
-	}
-
-	// Encode posts array and send back to client
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(posts); err != nil {
-		// Log any JSON encoding error
-		log.Printf("Error encoding response: %v", err)
-
-		// Return a 500 error if posts encoding fails
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-}
-
-func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
+func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var req entities.FilterRequest
 
-	// Attempt to parse the JSON body to check for tags
-	if err := utils.DecodeJSON(r, &req); err != nil {
-		log.Printf("Error decoding response body: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+	if r.Body == nil || r.ContentLength == 0 {
+		req = entities.FilterRequest{} // Set an empty request struct
+	} else {
+		if err := utils.DecodeJSON(r, &req); err != nil {
+			log.Printf("Error decoding request body: %v", err)
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
 	}
 
-	tags := req.Tags
-	usernames := req.Usernames
+	// Dynamically construct the filter
+	var conditions []bson.M
 
-	filter := bson.M{
-		"$and": []bson.M{
-			{"tags": bson.M{"$all": tags}},
-			{"username": bson.M{"$in": usernames}},
-		},
+	tags := req.Tags
+	if len(tags) > 0 {
+		conditions = append(conditions, bson.M{"tags": bson.M{"$in": tags}})
+	}
+
+	usernames := req.Usernames
+	if len(usernames) > 0 {
+		conditions = append(conditions, bson.M{"username": bson.M{"$in": usernames}})
+	}
+
+	var filter bson.M
+	if len(conditions) > 0 {
+		filter = bson.M{"$and": conditions}
+	} else {
+		filter = bson.M{}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -84,17 +63,20 @@ func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer cursor.Close(ctx)
+
 	var results []entities.Post
 	if err = cursor.All(ctx, &results); err != nil {
 		log.Printf("Error decoding documents into results: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+
 	// If no documents are found, return a 204 No Content status
 	if len(results) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(results); err != nil {
 		// Log any JSON encoding error
