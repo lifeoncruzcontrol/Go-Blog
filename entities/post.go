@@ -28,4 +28,6 @@ type UpdateText struct {
 type FilterRequest struct {
 	Tags      []string `json:"tags"`
 	Usernames []string `json:"usernames"`
+	Limit     int      `json:"limit"`
+	LastID    string   `json:"lastid"`
 }
