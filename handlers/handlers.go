@@ -10,6 +10,7 @@ import (
 	"go-blog-api/db"
 	"go-blog-api/entities"
 	"go-blog-api/utils"
+	"go-blog-api/validation"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -147,6 +148,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure Tags field is initialized to an empty slice if nil
 	if newPost.Tags == nil {
 		newPost.Tags = []string{}
+	}
+
+	if err := validation.ValidatePost(newPost); err != nil {
+		log.Printf("Missing title or username in post: %v", err)
+		http.Error(w, "Missing title or username in post", http.StatusBadRequest)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
