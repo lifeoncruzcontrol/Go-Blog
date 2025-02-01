@@ -43,14 +43,7 @@ func main() {
 				return
 			}
 
-			filter := r.URL.Query().Get("filter")
-			if filter == "true" {
-				handlers.FilterPostsHandler(w, r)
-				return
-			}
-
-			// If neither ID nor tags are provided, retrieve all posts
-			handlers.GetAllPostsHandler(w)
+			handlers.GetPostsHandler(w, r)
 		case http.MethodPatch:
 			handlers.PatchTextByIdHandler(w, r)
 		case http.MethodDelete:
