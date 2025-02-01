@@ -52,8 +52,8 @@ func GetAllPostsHandler(w http.ResponseWriter) {
 	}
 }
 
-func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request) {
-	var req entities.TagsRequest
+func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
+	var req entities.FilterRequest
 
 	// Attempt to parse the JSON body to check for tags
 	if err := utils.DecodeJSON(r, &req); err != nil {
@@ -62,15 +62,16 @@ func GetPostByTagsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Tags) == 0 {
-		log.Printf("Tags required for filtering by tags")
-		http.Error(w, "Missing tags", http.StatusBadRequest)
-		return
+	tags := req.Tags
+	usernames := req.Usernames
+
+	filter := bson.M{
+		"$and": []bson.M{
+			{"tags": bson.M{"$all": tags}},
+			{"username": bson.M{"$in": usernames}},
+		},
 	}
 
-	tags := req.Tags
-
-	filter := bson.M{"tags": bson.M{"$all": tags}}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
