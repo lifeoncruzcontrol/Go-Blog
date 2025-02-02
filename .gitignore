@@ -1,2 +1,2 @@
-cmd/go-blog-api/go-blog-api
-.env
+backend/cmd/go-blog-api/go-blog-api
+**/*/.env
