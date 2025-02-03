@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import Navbar from './components/Navbar';
-import { TextField } from '@mui/material';
 import Home from './pages/Home';
 import History from './pages/History';
 import { BrowserRouter as Router, Routes, Route } from "react-router";
@@ -17,7 +15,6 @@ function App() {
         <Route path="/history" element={<History />} />
       </Routes>
     </Router>
-    <TextField />
     </>
   )
 }
