@@ -1,7 +1,14 @@
-import React from "react";
-import { TextField, Typography, Button, Box } from "@mui/material";
+import React, { useState } from "react";
+import { TextField, Typography, Button, Box, Toolbar, Chip, Autocomplete } from "@mui/material";
+
+const existingTags = ["React", "FastAPI", "MongoDB", "TypeScript"];
 
 const Home: React.FC = () => {
+    const [username, setUsername] = useState<string>("");
+    const [title, setTitle] = useState<string>("");
+    const [postText, setPostText] = useState<string>("");
+    const [tags, setTags] = useState<string[]>([]);
+
     return (
         <Box 
             display="flex" 
@@ -9,21 +16,64 @@ const Home: React.FC = () => {
             alignItems="center" 
             justifyContent="center" 
             width="100%" 
-            maxWidth={600} // Adjust max width for better responsiveness
-            mx="auto" // Centers horizontally
-            p={2} // Adds padding for better spacing
+            maxWidth={600} 
+            mx="auto" 
+            p={2} 
         >
+            {/* Spacer to prevent overlap with fixed navbar */}
+            <Toolbar />
+
             <Typography variant="h4" gutterBottom textAlign="center">
                 What would you like to post?
             </Typography>
 
+            {/* Username Field */}
+            <TextField
+                fullWidth
+                label="Username"
+                variant="outlined"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2 }}
+            />
+
+            {/* Title Field */}
+            <TextField
+                fullWidth
+                label="Title"
+                variant="outlined"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                sx={{ mb: 2 }}
+            />
+
+            {/* Tags Field */}
+            <Autocomplete
+                multiple
+                freeSolo
+                options={existingTags}
+                value={tags}
+                onChange={(event, newValue) => setTags(newValue)}
+                renderTags={(value, getTagProps) => 
+                    value.map((option, index) => (
+                        <Chip label={option} {...getTagProps({ index })} />
+                    ))
+                }
+                renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
+                sx={{ mb: 2, width: "100%" }}
+            />
+
+            {/* Post Text Field */}
             <TextField
                 fullWidth
                 multiline
-                minRows={5} // Reduced for better scaling on mobile
-                maxRows={10} // Allows it to expand
+                minRows={5}
+                maxRows={10}
+                label="Post Content"
                 variant="outlined"
-                sx={{ mb: 2 }} // Adds spacing below the text field
+                value={postText}
+                onChange={(e) => setPostText(e.target.value)}
+                sx={{ mb: 2 }}
             />
 
             <Button 
@@ -33,7 +83,7 @@ const Home: React.FC = () => {
                     height: 50, 
                     backgroundColor: '#c5d8df',
                     '&:hover': {
-                        backgroundColor: '#a3b7c7', // Optional: darkens the button on hover
+                        backgroundColor: '#a3b7c7',
                     }
                 }}
             >
