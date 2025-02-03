@@ -9,11 +9,12 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useLocation } from "react-router"; // FIXED: use "react-router-dom"
+import { Link, useLocation } from "react-router"; 
 
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,9 +34,15 @@ const Navbar: React.FC = () => {
   return (
     <AppBar position="fixed" sx={{ backgroundColor: "#c5d8df", width: "100%" }}>
       <Toolbar>
-        {/* Logo */}
+        {/* Logo and Title */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <img src="/logo.jpg" alt="Logo" style={{ height: "40px", width: "auto" }} />
+          <Typography 
+            variant="h6" 
+            sx={{ marginLeft: 1, fontWeight: "bold", color: "black" }}
+          >
+            Go Blog
+          </Typography>
         </Box>
 
         {/* Pushes menu items to the right */}
@@ -56,7 +63,7 @@ const Navbar: React.FC = () => {
                       onClick={handleDrawerToggle}
                       sx={{
                         backgroundColor: location.pathname === item.path ? "#c5d8df" : "inherit",
-                        color: location.pathname === item.path ? "black" : "white", // Black active, white inactive
+                        color: location.pathname === item.path ? "black" : "white",
                       }}
                     >
                       <ListItemText primary={item.text} />
@@ -74,7 +81,7 @@ const Navbar: React.FC = () => {
                 to={item.path}
                 style={{
                   textDecoration: "none",
-                  color: location.pathname === item.path ? "black" : "white", // Black active, white inactive
+                  color: location.pathname === item.path ? "black" : "white",
                   fontWeight: location.pathname === item.path ? "bold" : "normal",
                   marginRight: "20px",
                 }}
