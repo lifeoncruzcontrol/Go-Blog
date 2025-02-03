@@ -3,17 +3,21 @@ import {
   AppBar,
   Toolbar,
   Box,
-  Button,
   IconButton,
   Drawer,
   List,
   ListItem,
-  ListItemText,
   ListItemButton,
+  ListItemText,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router";
+
+// Dummy pages
+const Home = () => <h2>Home Page</h2>;
+const About = () => <h2>About Page</h2>;
 
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -25,17 +29,13 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <>
+    <Router>
       {/* Navbar */}
       <AppBar position="fixed" sx={{ backgroundColor: "#212121", width: "100%" }}>
         <Toolbar>
           {/* Logo Image (Left Aligned) */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <img 
-              src="/logo.jpg"  // Update with your logo path
-              alt="Logo"
-              style={{ height: "40px", width: "auto" }} // Adjust size as needed
-            />
+            <img src="/logo.jpg" alt="Logo" style={{ height: "40px", width: "auto" }} />
           </Box>
 
           {/* Pushes menu items to the right */}
@@ -49,9 +49,9 @@ const Navbar: React.FC = () => {
               </IconButton>
               <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
                 <List>
-                  {["Home", "About"].map((text) => (
+                  {["Home", "About"].map((text, index) => (
                     <ListItem key={text} disablePadding>
-                      <ListItemButton onClick={handleDrawerToggle}>
+                      <ListItemButton component={Link} to={index === 0 ? "/" : "/about"} onClick={handleDrawerToggle}>
                         <ListItemText primary={text} />
                       </ListItemButton>
                     </ListItem>
@@ -62,13 +62,25 @@ const Navbar: React.FC = () => {
           ) : (
             /* Desktop Menu */
             <Box>
-              <Button color="inherit">Home</Button>
-              <Button color="inherit">About</Button>
+              <Link to="/" style={{ textDecoration: "none", color: "white", marginRight: "20px" }}>
+                Home
+              </Link>
+              <Link to="/about" style={{ textDecoration: "none", color: "white" }}>
+                About
+              </Link>
             </Box>
           )}
         </Toolbar>
       </AppBar>
-    </>
+
+      {/* Page Content */}
+      <Box sx={{ marginTop: "64px", padding: "20px" }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </Box>
+    </Router>
   );
 };
 
