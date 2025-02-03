@@ -149,7 +149,7 @@ export function Search() {
       <OutlinedInput
         size="small"
         id="search"
-        placeholder="Search…"
+        placeholder="Search"
         sx={{ flexGrow: 1 }}
         startAdornment={
           <InputAdornment position="start" sx={{ color: 'text.primary' }}>
@@ -187,7 +187,7 @@ export default function MainContent() {
         <Typography variant="h1" gutterBottom>
           Blog
         </Typography>
-        <Typography>Stay in the loop with the latest about our products</Typography>
+        <Typography>Built with React, Typescript, MUI, Go, and MongoDB</Typography>
       </div>
       <Box
         sx={{

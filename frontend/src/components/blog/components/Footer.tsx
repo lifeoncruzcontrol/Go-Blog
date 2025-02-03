@@ -18,8 +18,8 @@ function Copyright() {
   return (
     <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
       {'Copyright © '}
-      <Link color="text.secondary" href="https://mui.com/">
-        Sitemark
+      <Link color="text.secondary" href="https://lifeoncruzcontrol.com/">
+        Lifeoncruzcontrol
       </Link>
       &nbsp;
       {new Date().getFullYear()}
@@ -41,7 +41,7 @@ export default function Footer() {
           textAlign: { sm: 'center', md: 'left' },
         }}
       >
-        <Box
+        {/* <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
@@ -164,7 +164,7 @@ export default function Footer() {
               Contact
             </Link>
           </Box>
-        </Box>
+        </Box> */}
         <Box
           sx={{
             display: 'flex',
@@ -196,7 +196,7 @@ export default function Footer() {
             <IconButton
               color="inherit"
               size="small"
-              href="https://github.com/mui"
+              href="https://github.com/lifeoncruzcontrol/Go-Blog"
               aria-label="GitHub"
               sx={{ alignSelf: 'center' }}
             >
@@ -205,16 +205,7 @@ export default function Footer() {
             <IconButton
               color="inherit"
               size="small"
-              href="https://x.com/MaterialUI"
-              aria-label="X"
-              sx={{ alignSelf: 'center' }}
-            >
-              <TwitterIcon />
-            </IconButton>
-            <IconButton
-              color="inherit"
-              size="small"
-              href="https://www.linkedin.com/company/mui/"
+              href="https://www.linkedin.com/in/lifeoncruzcontrol/"
               aria-label="LinkedIn"
               sx={{ alignSelf: 'center' }}
             >
