@@ -41,7 +41,7 @@ export default function Footer() {
           textAlign: { sm: 'center', md: 'left' },
         }}
       >
-        {/* <Box
+        <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
@@ -64,12 +64,12 @@ export default function Footer() {
                 gutterBottom
                 sx={{ fontWeight: 600, mt: 2 }}
               >
-                Join the newsletter
+                This project was fun
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                Subscribe for weekly updates. No spams ever!
+                Contact me if you'd like me to build your next idea!
               </Typography>
-              <InputLabel htmlFor="email-newsletter">Email</InputLabel>
+              {/* <InputLabel htmlFor="email-newsletter">Email</InputLabel>
               <Stack direction="row" spacing={1} useFlexGap>
                 <TextField
                   id="email-newsletter"
@@ -95,10 +95,10 @@ export default function Footer() {
                 >
                   Subscribe
                 </Button>
-              </Stack>
+              </Stack> */}
             </Box>
           </Box>
-          <Box
+          {/* <Box
             sx={{
               display: { xs: 'none', sm: 'flex' },
               flexDirection: 'column',
@@ -123,8 +123,8 @@ export default function Footer() {
             <Link color="text.secondary" variant="body2" href="#">
               FAQs
             </Link>
-          </Box>
-          <Box
+          </Box> */}
+          {/* <Box
             sx={{
               display: { xs: 'none', sm: 'flex' },
               flexDirection: 'column',
@@ -143,8 +143,8 @@ export default function Footer() {
             <Link color="text.secondary" variant="body2" href="#">
               Press
             </Link>
-          </Box>
-          <Box
+          </Box> */}
+          {/* <Box
             sx={{
               display: { xs: 'none', sm: 'flex' },
               flexDirection: 'column',
@@ -163,8 +163,8 @@ export default function Footer() {
             <Link color="text.secondary" variant="body2" href="#">
               Contact
             </Link>
-          </Box>
-        </Box> */}
+          </Box> */}
+        </Box>
         <Box
           sx={{
             display: 'flex',
@@ -176,7 +176,7 @@ export default function Footer() {
           }}
         >
           <div>
-            <Link color="text.secondary" variant="body2" href="#">
+            {/* <Link color="text.secondary" variant="body2" href="#">
               Privacy Policy
             </Link>
             <Typography sx={{ display: 'inline', mx: 0.5, opacity: 0.5 }}>
@@ -184,7 +184,7 @@ export default function Footer() {
             </Typography>
             <Link color="text.secondary" variant="body2" href="#">
               Terms of Service
-            </Link>
+            </Link> */}
             <Copyright />
           </div>
           <Stack
