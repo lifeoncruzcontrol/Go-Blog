@@ -37,7 +37,7 @@ const Home: React.FC = () => {
                     }
                 }}
             >
-                Submit
+                Create new post
             </Button>
         </Box>
     );
