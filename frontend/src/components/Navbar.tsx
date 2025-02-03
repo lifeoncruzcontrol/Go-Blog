@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router"; // FIXED: use "react-router-dom"
 
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -31,7 +31,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: "#212121", width: "100%" }}>
+    <AppBar position="fixed" sx={{ backgroundColor: "#c5d8df", width: "100%" }}>
       <Toolbar>
         {/* Logo */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -55,8 +55,8 @@ const Navbar: React.FC = () => {
                       to={item.path}
                       onClick={handleDrawerToggle}
                       sx={{
-                        backgroundColor: location.pathname === item.path ? "#424242" : "inherit",
-                        color: location.pathname === item.path ? "white" : "inherit",
+                        backgroundColor: location.pathname === item.path ? "#c5d8df" : "inherit",
+                        color: location.pathname === item.path ? "black" : "white", // Black active, white inactive
                       }}
                     >
                       <ListItemText primary={item.text} />
@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
                 to={item.path}
                 style={{
                   textDecoration: "none",
-                  color: location.pathname === item.path ? "#ffcc00" : "white",
+                  color: location.pathname === item.path ? "black" : "white", // Black active, white inactive
                   fontWeight: location.pathname === item.path ? "bold" : "normal",
                   marginRight: "20px",
                 }}
