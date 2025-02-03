@@ -9,6 +9,35 @@ const Home: React.FC = () => {
     const [postText, setPostText] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
 
+    const handlePostSubmit = async () => {
+        const postData = {
+            "title": title,
+            "username": username,
+            "text": postText,
+            "tags": tags
+        }
+        
+        try {
+            const res = await fetch("http://127.0.0.1:8080/posts", {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                },
+                "body": JSON.stringify( postData )
+            });
+
+            if (!res.ok) {
+                throw new Error("Response not ok");
+            }
+
+            const data = await res.json();
+            console.log("Post created successfully: ", data);
+
+        } catch (err) {
+            console.error("Error trying to post: ", err)
+        }
+    };
+
     return (
         <Box 
             display="flex" 
@@ -86,6 +115,7 @@ const Home: React.FC = () => {
                         backgroundColor: '#a3b7c7',
                     }
                 }}
+                onClick={handlePostSubmit}
             >
                 Create new post
             </Button>
