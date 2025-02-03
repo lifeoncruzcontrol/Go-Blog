@@ -13,23 +13,30 @@ import {
   useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router";
 
 // Dummy pages
 const Home = () => <h2>Home Page</h2>;
 const About = () => <h2>About Page</h2>;
 
+// Component for Navbar
 const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const location = useLocation(); // Get current path
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const menuItems = [
+    { text: "Home", path: "/" },
+    { text: "About", path: "/about" },
+  ];
+
   return (
-    <Router>
+    <>
       {/* Navbar */}
       <AppBar position="fixed" sx={{ backgroundColor: "#212121", width: "100%" }}>
         <Toolbar>
@@ -42,17 +49,25 @@ const Navbar: React.FC = () => {
           <Box sx={{ flexGrow: 1 }} />
 
           {isMobile ? (
-            /* Mobile Menu Button */
+            /* Mobile Menu */
             <>
               <IconButton edge="end" color="inherit" onClick={handleDrawerToggle}>
                 <MenuIcon />
               </IconButton>
               <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
                 <List>
-                  {["Home", "About"].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                      <ListItemButton component={Link} to={index === 0 ? "/" : "/about"} onClick={handleDrawerToggle}>
-                        <ListItemText primary={text} />
+                  {menuItems.map((item) => (
+                    <ListItem key={item.text} disablePadding>
+                      <ListItemButton
+                        component={Link}
+                        to={item.path}
+                        onClick={handleDrawerToggle}
+                        sx={{
+                          backgroundColor: location.pathname === item.path ? "#424242" : "inherit",
+                          color: location.pathname === item.path ? "white" : "inherit",
+                        }}
+                      >
+                        <ListItemText primary={item.text} />
                       </ListItemButton>
                     </ListItem>
                   ))}
@@ -62,12 +77,20 @@ const Navbar: React.FC = () => {
           ) : (
             /* Desktop Menu */
             <Box>
-              <Link to="/" style={{ textDecoration: "none", color: "white", marginRight: "20px" }}>
-                Home
-              </Link>
-              <Link to="/about" style={{ textDecoration: "none", color: "white" }}>
-                About
-              </Link>
+              {menuItems.map((item) => (
+                <Link
+                  key={item.text}
+                  to={item.path}
+                  style={{
+                    textDecoration: "none",
+                    color: location.pathname === item.path ? "#ffcc00" : "white",
+                    fontWeight: location.pathname === item.path ? "bold" : "normal",
+                    marginRight: "20px",
+                  }}
+                >
+                  {item.text}
+                </Link>
+              ))}
             </Box>
           )}
         </Toolbar>
@@ -80,8 +103,17 @@ const Navbar: React.FC = () => {
           <Route path="/about" element={<About />} />
         </Routes>
       </Box>
+    </>
+  );
+};
+
+// Wrap Navbar inside Router
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Navbar />
     </Router>
   );
 };
 
-export default Navbar;
+export default App;
