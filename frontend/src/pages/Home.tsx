@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField, Typography, Button, Box, Toolbar, Chip, Autocomplete } from "@mui/material";
+import { TextField, Typography, Button, Box, Toolbar, Chip, Autocomplete, Snackbar, Alert } from "@mui/material";
 
 const existingTags = ["React", "FastAPI", "MongoDB", "TypeScript"];
 
@@ -8,6 +8,7 @@ const Home: React.FC = () => {
     const [title, setTitle] = useState<string>("");
     const [postText, setPostText] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
 
     const handlePostSubmit = async () => {
         const postData = {
@@ -23,7 +24,7 @@ const Home: React.FC = () => {
                 "headers": {
                     "Content-Type": "application/json",
                 },
-                "body": JSON.stringify( postData )
+                "body": JSON.stringify(postData)
             });
 
             if (!res.ok) {
@@ -32,6 +33,9 @@ const Home: React.FC = () => {
 
             const data = await res.json();
             console.log("Post created successfully: ", data);
+
+            // Show success message
+            setOpenSnackbar(true);
 
         } catch (err) {
             console.error("Error trying to post: ", err)
@@ -119,6 +123,17 @@ const Home: React.FC = () => {
             >
                 Create new post
             </Button>
+
+            {/* Snackbar for success message */}
+            <Snackbar 
+                open={openSnackbar} 
+                autoHideDuration={3000} 
+                onClose={() => setOpenSnackbar(false)}
+            >
+                <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+                    Post created successfully!
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
