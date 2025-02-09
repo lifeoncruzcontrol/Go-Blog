@@ -3,9 +3,9 @@ services:
     image: mongo
     container_name: mongodb-container
     ports:
-      - "27017:27017"
+      - "${DB_PORT}:27017"
     volumes:
-      - db-data:/data/db
+      - ${DATABASE}:/data/db
     networks:
       - go-blog-network
   app:

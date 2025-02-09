@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -71,6 +72,15 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	totalDocuments, err := db.Posts.CountDocuments(ctx, filter)
+	if err != nil {
+		log.Printf("Error counting total number of matching documents: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	totalPages := int(math.Ceil(float64(totalDocuments) / float64(limit)))
+
 	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.M{"_id": 1})
 
 	cursor, err := db.Posts.Find(ctx, filter, opts)
@@ -104,8 +114,10 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	res := map[string]interface{}{
 		"data": results,
 		"pagination": map[string]interface{}{
-			"limit":      limit,
-			"nextCursor": nextCursor,
+			"limit":          limit,
+			"nextCursor":     nextCursor,
+			"totalDocuments": totalDocuments,
+			"totalPages":     totalPages,
 		},
 	}
 
