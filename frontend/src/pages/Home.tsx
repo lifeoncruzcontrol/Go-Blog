@@ -30,10 +30,15 @@ const Home: React.FC = () => {
             }
 
             const data = await res.json();
-            console.log("Post created successfully: ", data);
 
             // Show success message
             setOpenSnackbar(true);
+
+            setUsername("");
+            setTitle("");
+            setPostText("");
+            setTags("");
+
         } catch (err) {
             console.error("Error trying to post: ", err);
         }
