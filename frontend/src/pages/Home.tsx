@@ -1,30 +1,28 @@
 import React, { useState } from "react";
-import { TextField, Typography, Button, Box, Toolbar, Chip, Autocomplete, Snackbar, Alert } from "@mui/material";
-
-const existingTags = ["React", "FastAPI", "MongoDB", "TypeScript"];
+import { TextField, Typography, Button, Box, Toolbar, Snackbar, Alert } from "@mui/material";
 
 const Home: React.FC = () => {
     const [username, setUsername] = useState<string>("");
     const [title, setTitle] = useState<string>("");
     const [postText, setPostText] = useState<string>("");
-    const [tags, setTags] = useState<string[]>([]);
+    const [tags, setTags] = useState<string>("");
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
 
     const handlePostSubmit = async () => {
         const postData = {
-            "title": title,
-            "username": username,
-            "text": postText,
-            "tags": tags
-        }
-        
+            title,
+            username,
+            text: postText,
+            tags: tags.split(",").map(tag => tag.trim()).filter(tag => tag !== ""), // Convert comma-separated string to array
+        };
+
         try {
             const res = await fetch("http://127.0.0.1:8080/posts", {
-                "method": "POST",
-                "headers": {
+                method: "POST",
+                headers: {
                     "Content-Type": "application/json",
                 },
-                "body": JSON.stringify(postData)
+                body: JSON.stringify(postData),
             });
 
             if (!res.ok) {
@@ -36,9 +34,8 @@ const Home: React.FC = () => {
 
             // Show success message
             setOpenSnackbar(true);
-
         } catch (err) {
-            console.error("Error trying to post: ", err)
+            console.error("Error trying to post: ", err);
         }
     };
 
@@ -80,20 +77,14 @@ const Home: React.FC = () => {
                 sx={{ mb: 2 }}
             />
 
-            {/* Tags Field */}
-            <Autocomplete
-                multiple
-                freeSolo
-                options={existingTags}
+            {/* Tags Field (Regular TextField instead of Autocomplete) */}
+            <TextField
+                fullWidth
+                label="Tags (comma-separated)"
+                variant="outlined"
                 value={tags}
-                onChange={(event, newValue) => setTags(newValue)}
-                renderTags={(value, getTagProps) => 
-                    value.map((option, index) => (
-                        <Chip label={option} {...getTagProps({ index })} />
-                    ))
-                }
-                renderInput={(params) => <TextField {...params} label="Tags" variant="outlined" />}
-                sx={{ mb: 2, width: "100%" }}
+                onChange={(e) => setTags(e.target.value)}
+                sx={{ mb: 2 }}
             />
 
             {/* Post Text Field */}
