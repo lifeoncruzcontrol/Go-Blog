@@ -24,6 +24,7 @@ const BlogPage: React.FC = () => {
     const [text, setText] = useState("");
     const [username, setUsername] = useState("");
     const [tags, setTags] = useState("");
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   
     // Fetch posts from the backend
     const fetchPosts = async () => {
@@ -63,6 +64,7 @@ const BlogPage: React.FC = () => {
           setText("");
           setUsername("");
           setTags("");
+          setOpenSnackbar(true);
         }
       } catch (error) {
         console.error("Error creating post:", error);
@@ -87,7 +89,7 @@ const BlogPage: React.FC = () => {
                     <Typography variant="body2">{new Date(post.datetime).toDateString()}</Typography>
                     <Typography variant="body1">{post.text.substring(0, 100)}...</Typography>
                     {post.tags?.length > 0 && (
-                      <Typography variant="body2" color="primary">Tags: {post.tags.join(", ")}</Typography>
+                      <Typography variant="body2" color="textSecondary">Tags: {post.tags.join(", ")}</Typography>
                     )}
                   </CardContent>
                 </Card>
@@ -110,6 +112,16 @@ const BlogPage: React.FC = () => {
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
           </Box>
         </Modal>
+          {/* Snackbar for success message */}
+          <Snackbar 
+              open={openSnackbar} 
+              autoHideDuration={3000} 
+              onClose={() => setOpenSnackbar(false)}
+          >
+              <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+                  Post created successfully!
+              </Alert>
+          </Snackbar>
       </Container>
     );
   };
