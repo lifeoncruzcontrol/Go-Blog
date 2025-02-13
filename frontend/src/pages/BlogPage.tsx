@@ -10,8 +10,10 @@ import {
   TextField,
   Snackbar,
   Alert,
+  IconButton
 } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
+import DeleteIcon from '@mui/icons-material/Delete';
 import BlogPost from "../interfaces/BlogPost";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
@@ -82,7 +84,12 @@ const BlogPage: React.FC = () => {
           {posts && posts?.data.length > 0 ? (
             posts.data.map((post: BlogPost) => (
               <Grid2 item xs={12} sm={6} md={4} key={post._id}>
-                <Card>
+                <Card sx={{ position: "relative", p: 2 }}>
+                <Box sx={{ position: "absolute", top: 5, right: 5 }}>
+                  <IconButton onClick={() => handleDelete(post._id)} color="textSecondary">
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
                   <CardContent>
                     <Typography variant="h5">{post.title}</Typography>
                     <Typography variant="body2" color="textSecondary">{post.username}</Typography>
