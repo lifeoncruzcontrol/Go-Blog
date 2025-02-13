@@ -26,6 +26,7 @@ const BlogPage: React.FC = () => {
     const [text, setText] = useState("");
     const [username, setUsername] = useState("");
     const [tags, setTags] = useState("");
+    const [snackbarMsg, setSnackbarMsg] = useState<string>("");
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   
     // Fetch posts from the backend
@@ -66,10 +67,26 @@ const BlogPage: React.FC = () => {
           setText("");
           setUsername("");
           setTags("");
+          setSnackbarMsg("Post created successfully!");
           setOpenSnackbar(true);
         }
       } catch (error) {
         console.error("Error creating post:", error);
+      }
+    };
+
+    const handleDelete = async (postId: string) => {
+      try {
+        const res = await fetch(`http://127.0.0.1:8080/posts?id=${postId}`, {
+          method: "DELETE"
+        });
+        if (res.ok) {
+          setSnackbarMsg("Post deleted successfully!");
+          setOpenSnackbar(true);
+          fetchPosts();
+        }
+      } catch (err) {
+        console.error("Error trying to delete post: ", err);
       }
     };
   
@@ -83,10 +100,10 @@ const BlogPage: React.FC = () => {
         <Grid2 container spacing={3} sx={{ mt: 2 }}>
           {posts && posts?.data.length > 0 ? (
             posts.data.map((post: BlogPost) => (
-              <Grid2 item xs={12} sm={6} md={4} key={post._id}>
+              <Grid2 item xs={12} sm={6} md={4} key={post.id}>
                 <Card sx={{ position: "relative", p: 2 }}>
                 <Box sx={{ position: "absolute", top: 5, right: 5 }}>
-                  <IconButton onClick={() => handleDelete(post._id)} color="textSecondary">
+                  <IconButton onClick={() => handleDelete(post.id)} color="textSecondary">
                     <DeleteIcon />
                   </IconButton>
                 </Box>
@@ -119,16 +136,16 @@ const BlogPage: React.FC = () => {
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
           </Box>
         </Modal>
-          {/* Snackbar for success message */}
-          <Snackbar 
-              open={openSnackbar} 
-              autoHideDuration={3000} 
-              onClose={() => setOpenSnackbar(false)}
-          >
-              <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
-                  Post created successfully!
-              </Alert>
-          </Snackbar>
+        {/* Snackbar for success message */}
+        <Snackbar 
+            open={openSnackbar} 
+            autoHideDuration={3000} 
+            onClose={() => setOpenSnackbar(false)}
+        >
+            <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+                {snackbarMsg}
+            </Alert>
+        </Snackbar>
       </Container>
     );
   };
