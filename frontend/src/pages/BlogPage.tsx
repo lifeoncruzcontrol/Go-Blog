@@ -83,7 +83,12 @@ const BlogPage: React.FC = () => {
         if (res.ok) {
           setSnackbarMsg("Post deleted successfully!");
           setOpenSnackbar(true);
-          fetchPosts();
+          
+          setPosts((prevPosts) =>
+            prevPosts
+              ? { ...prevPosts, data: prevPosts.data.filter((post) => post.id !== postId) }
+              : prevPosts
+          );          
         }
       } catch (err) {
         console.error("Error trying to delete post: ", err);
