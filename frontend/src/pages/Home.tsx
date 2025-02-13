@@ -30,8 +30,6 @@ const BlogPage: React.FC = () => {
       try {
         const response = await fetch("http://127.0.0.1:8080/posts");
         const data = await response.json();
-        
-        console.log("Fetched posts:", data); // Debugging
   
         setPosts(data);
       } catch (error) {
@@ -51,7 +49,6 @@ const BlogPage: React.FC = () => {
         username, 
         tags: tags.split(",").map(tag => tag.trim())  // Convert string to array
       };
-      console.log(newPost)
       try {
         const response = await fetch("http://127.0.0.1:8080/posts", {
           method: "POST",
@@ -87,7 +84,7 @@ const BlogPage: React.FC = () => {
                   <CardContent>
                     <Typography variant="h5">{post.title}</Typography>
                     <Typography variant="body2" color="textSecondary">{post.username}</Typography>
-                    <Typography variant="body2">{new Date(post.dateTime).toDateString()}</Typography>
+                    <Typography variant="body2">{new Date(post.datetime).toDateString()}</Typography>
                     <Typography variant="body1">{post.text.substring(0, 100)}...</Typography>
                     {post.tags?.length > 0 && (
                       <Typography variant="body2" color="primary">Tags: {post.tags.join(", ")}</Typography>
