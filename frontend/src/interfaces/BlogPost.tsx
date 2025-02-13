@@ -1,5 +1,5 @@
 interface BlogPost {
-    _id: string;
+    id: string;
     title: string;
     username: string;
     text: string;
