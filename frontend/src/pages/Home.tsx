@@ -1,137 +1,129 @@
-import React, { useState } from "react";
-import { TextField, Typography, Button, Box, Toolbar, Snackbar, Alert } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Modal,
+  Box,
+  TextField,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import Grid2 from '@mui/material/Grid2';
+import BlogPost from "../interfaces/BlogPost";
+import GetPostsResponse from "../interfaces/GetPostsResponse";
 
-const Home: React.FC = () => {
-    const [username, setUsername] = useState<string>("");
-    const [title, setTitle] = useState<string>("");
-    const [postText, setPostText] = useState<string>("");
-    const [tags, setTags] = useState<string>("");
+const BlogPage: React.FC = () => {
+    const [posts, setPosts] = useState<GetPostsResponse | null>(null);
+    const [open, setOpen] = useState(false);
+    
+    // Form states for creating a new post
+    const [title, setTitle] = useState("");
+    const [text, setText] = useState("");
+    const [username, setUsername] = useState("");
+    const [tags, setTags] = useState("");
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
-
-    const handlePostSubmit = async () => {
-        const postData = {
-            title,
-            username,
-            text: postText,
-            tags: tags.split(",").map(tag => tag.trim()).filter(tag => tag !== ""), // Convert comma-separated string to array
-        };
-
-        try {
-            const res = await fetch("http://127.0.0.1:8080/posts", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
-
-            if (!res.ok) {
-                throw new Error("Response not ok");
-            }
-
-            const data = await res.json();
-
-            // Show success message
-            setOpenSnackbar(true);
-
-            setUsername("");
-            setTitle("");
-            setPostText("");
-            setTags("");
-
-        } catch (err) {
-            console.error("Error trying to post: ", err);
-        }
+  
+    // Fetch posts from the backend
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8080/posts");
+        const data = await response.json();
+  
+        setPosts(data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
     };
-
+  
+    useEffect(() => {
+      fetchPosts();
+    }, []);
+  
+    // Handle form submission
+    const handleSubmit = async () => {
+      const newPost = { 
+        title, 
+        text, 
+        username, 
+        tags: tags.split(",").map(tag => tag.trim())  // Convert string to array
+      };
+      try {
+        const response = await fetch("http://127.0.0.1:8080/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newPost),
+        });
+  
+        if (response.ok) {
+          fetchPosts(); // Refresh the posts
+          setOpen(false); // Close modal
+          setTitle("");
+          setText("");
+          setUsername("");
+          setTags("");
+          setOpenSnackbar(true);
+        }
+      } catch (error) {
+        console.error("Error creating post:", error);
+      }
+    };
+  
     return (
-        <Box 
-            display="flex" 
-            flexDirection="column" 
-            alignItems="center" 
-            justifyContent="center" 
-            width="100%" 
-            maxWidth={600} 
-            mx="auto" 
-            p={2} 
-        >
-            {/* Spacer to prevent overlap with fixed navbar */}
-            <Toolbar />
+      <Container>
+        <Typography variant="h3" gutterBottom>Blog Posts</Typography>
+        <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+          Create New Post
+        </Button>
+  
+        <Grid2 container spacing={3} sx={{ mt: 2 }}>
+          {posts && posts?.data.length > 0 ? (
+            posts.data.map((post: BlogPost) => (
+              <Grid2 item xs={12} sm={6} md={4} key={post._id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5">{post.title}</Typography>
+                    <Typography variant="body2" color="textSecondary">{post.username}</Typography>
+                    <Typography variant="body2">{new Date(post.datetime).toDateString()}</Typography>
+                    <Typography variant="body1">{post.text.substring(0, 100)}...</Typography>
+                    {post.tags?.length > 0 && (
+                      <Typography variant="body2" color="textSecondary">Tags: {post.tags.join(", ")}</Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid2>
+            ))
+          ) : (
+            <Typography variant="h6" sx={{ mt: 2 }}>No posts available.</Typography>
+          )}
 
-            <Typography variant="h4" gutterBottom textAlign="center">
-                What would you like to post?
-            </Typography>
-
-            {/* Username Field */}
-            <TextField
-                fullWidth
-                label="Username"
-                variant="outlined"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                sx={{ mb: 2 }}
-            />
-
-            {/* Title Field */}
-            <TextField
-                fullWidth
-                label="Title"
-                variant="outlined"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                sx={{ mb: 2 }}
-            />
-
-            {/* Tags Field (Regular TextField instead of Autocomplete) */}
-            <TextField
-                fullWidth
-                label="Tags (comma-separated)"
-                variant="outlined"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                sx={{ mb: 2 }}
-            />
-
-            {/* Post Text Field */}
-            <TextField
-                fullWidth
-                multiline
-                minRows={5}
-                maxRows={10}
-                label="Post Content"
-                variant="outlined"
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                sx={{ mb: 2 }}
-            />
-
-            <Button 
-                fullWidth 
-                variant="contained"
-                sx={{ 
-                    height: 50, 
-                    backgroundColor: '#c5d8df',
-                    '&:hover': {
-                        backgroundColor: '#a3b7c7',
-                    }
-                }}
-                onClick={handlePostSubmit}
-            >
-                Create new post
-            </Button>
-
-            {/* Snackbar for success message */}
-            <Snackbar 
-                open={openSnackbar} 
-                autoHideDuration={3000} 
-                onClose={() => setOpenSnackbar(false)}
-            >
-                <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
-                    Post created successfully!
-                </Alert>
-            </Snackbar>
-        </Box>
+        </Grid2>
+  
+        {/* Create Post Modal */}
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <Box sx={{ width: 400, p: 3, bgcolor: "background.paper", mx: "auto", mt: 10, borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom>Create a New Post</Typography>
+            <TextField label="Title" fullWidth sx={{ mb: 2 }} value={title} onChange={(e) => setTitle(e.target.value)} />
+            <TextField label="Username" fullWidth sx={{ mb: 2 }} value={username} onChange={(e) => setUsername(e.target.value)} />
+            <TextField label="Text" multiline rows={4} fullWidth sx={{ mb: 2 }} value={text} onChange={(e) => setText(e.target.value)} />
+            <TextField label="Tags (comma-separated)" fullWidth sx={{ mb: 2 }} value={tags} onChange={(e) => setTags(e.target.value)} />
+            <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+          </Box>
+        </Modal>
+          {/* Snackbar for success message */}
+          <Snackbar 
+              open={openSnackbar} 
+              autoHideDuration={3000} 
+              onClose={() => setOpenSnackbar(false)}
+          >
+              <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: '100%' }}>
+                  Post created successfully!
+              </Alert>
+          </Snackbar>
+      </Container>
     );
-};
-
-export default Home;
+  };
+  
+export default BlogPage;
