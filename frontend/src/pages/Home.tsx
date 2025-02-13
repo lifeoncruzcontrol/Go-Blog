@@ -21,8 +21,8 @@ const BlogPage: React.FC = () => {
     
     // Form states for creating a new post
     const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [author, setAuthor] = useState("");
+    const [text, setText] = useState("");
+    const [username, setUsername] = useState("");
     const [tags, setTags] = useState("");
   
     // Fetch posts from the backend
@@ -47,11 +47,11 @@ const BlogPage: React.FC = () => {
     const handleSubmit = async () => {
       const newPost = { 
         title, 
-        content, 
-        author, 
+        text, 
+        username, 
         tags: tags.split(",").map(tag => tag.trim())  // Convert string to array
       };
-  
+      console.log(newPost)
       try {
         const response = await fetch("http://127.0.0.1:8080/posts", {
           method: "POST",
@@ -63,8 +63,8 @@ const BlogPage: React.FC = () => {
           fetchPosts(); // Refresh the posts
           setOpen(false); // Close modal
           setTitle("");
-          setContent("");
-          setAuthor("");
+          setText("");
+          setUsername("");
           setTags("");
         }
       } catch (error) {
@@ -107,8 +107,8 @@ const BlogPage: React.FC = () => {
           <Box sx={{ width: 400, p: 3, bgcolor: "background.paper", mx: "auto", mt: 10, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom>Create a New Post</Typography>
             <TextField label="Title" fullWidth sx={{ mb: 2 }} value={title} onChange={(e) => setTitle(e.target.value)} />
-            <TextField label="Author" fullWidth sx={{ mb: 2 }} value={author} onChange={(e) => setAuthor(e.target.value)} />
-            <TextField label="Content" multiline rows={4} fullWidth sx={{ mb: 2 }} value={content} onChange={(e) => setContent(e.target.value)} />
+            <TextField label="Username" fullWidth sx={{ mb: 2 }} value={username} onChange={(e) => setUsername(e.target.value)} />
+            <TextField label="Text" multiline rows={4} fullWidth sx={{ mb: 2 }} value={text} onChange={(e) => setText(e.target.value)} />
             <TextField label="Tags (comma-separated)" fullWidth sx={{ mb: 2 }} value={tags} onChange={(e) => setTags(e.target.value)} />
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
           </Box>
