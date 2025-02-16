@@ -4,7 +4,7 @@ interface BlogPost {
     username: string;
     text: string;
     tags: string[];
-    dateTime: any;
+    datetime: any;
 }
 
 export default BlogPost;
