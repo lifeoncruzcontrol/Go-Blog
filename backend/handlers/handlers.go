@@ -52,8 +52,8 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Handle cursor pagination
-	if req.LastID != "" {
-		lastObjectID, err := primitive.ObjectIDFromHex(req.LastID)
+	if req.NextCursor != "" {
+		lastObjectID, err := primitive.ObjectIDFromHex(req.NextCursor)
 		if err != nil {
 			log.Printf("Error converting ID to valid hex format: %v", err)
 			http.Error(w, "Invalid ID format", http.StatusBadRequest)
@@ -111,13 +111,13 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		nextCursor = lastDoc.ID.Hex()
 	}
 
-	res := map[string]interface{}{
-		"data": results,
-		"pagination": map[string]interface{}{
-			"limit":          limit,
-			"nextCursor":     nextCursor,
-			"totalDocuments": totalDocuments,
-			"totalPages":     totalPages,
+	res := entities.Response{
+		Data: results,
+		Pagination: entities.Pagination{
+			Limit:          limit,
+			NextCursor:     nextCursor,
+			TotalDocuments: totalDocuments,
+			TotalPages:     totalPages,
 		},
 	}
 

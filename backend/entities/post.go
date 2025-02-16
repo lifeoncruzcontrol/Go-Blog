@@ -26,8 +26,20 @@ type UpdateText struct {
 }
 
 type FilterRequest struct {
-	Tags      []string `json:"tags"`
-	Usernames []string `json:"usernames"`
-	Limit     int      `json:"limit"`
-	LastID    string   `json:"lastid"`
+	Tags       []string `json:"tags"`
+	Usernames  []string `json:"usernames"`
+	Limit      int      `json:"limit"`
+	NextCursor string   `json:"nextcursor"`
+}
+
+type Pagination struct {
+	Limit          int    `json:"limit"`
+	NextCursor     string `json:"nextCursor"`
+	TotalDocuments int64  `json:"totalDocuments"`
+	TotalPages     int    `json:"totalPages"`
+}
+
+type Response struct {
+	Data       []Post     `json:"data"`
+	Pagination Pagination `json:"pagination"`
 }
