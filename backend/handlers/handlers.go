@@ -19,7 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
+func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var req entities.FilterRequest
 
 	if r.Body == nil || r.ContentLength == 0 {
