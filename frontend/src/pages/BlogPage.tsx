@@ -18,7 +18,7 @@ import BlogPost from "../interfaces/BlogPost";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
 const BlogPage: React.FC = () => {
-    const [posts, setPosts] = useState<GetPostsResponse | null>(null);
+    const [getPostsResponse, setGetPostsResponse] = useState<GetPostsResponse | null>(null);
     const [open, setOpen] = useState(false);
     
     // Form states for creating a new post
@@ -35,7 +35,7 @@ const BlogPage: React.FC = () => {
         const response = await fetch("http://127.0.0.1:8080/posts");
         const data = await response.json();
   
-        setPosts(data);
+        setGetPostsResponse(data);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -84,7 +84,7 @@ const BlogPage: React.FC = () => {
           setSnackbarMsg("Post deleted successfully!");
           setOpenSnackbar(true);
           
-          setPosts((prevPosts) =>
+          setGetPostsResponse((prevPosts) =>
             prevPosts
               ? { ...prevPosts, data: prevPosts.data.filter((post) => post.id !== postId) }
               : prevPosts
@@ -103,8 +103,8 @@ const BlogPage: React.FC = () => {
         </Button>
   
         <Grid2 container spacing={3} sx={{ mt: 2 }}>
-          {posts && posts?.data.length > 0 ? (
-            posts.data.map((post: BlogPost) => (
+          {getPostsResponse && getPostsResponse.data.length > 0 ? (
+            getPostsResponse.data.map((post: BlogPost) => (
               <Grid2 item xs={12} sm={6} md={4} key={post.id}>
                 <Card sx={{ position: "relative", p: 2 }}>
                 <Box sx={{ position: "absolute", top: 5, right: 5 }}>

@@ -1,7 +1,7 @@
 interface BlogPost {
     id: string;
     title: string;
-    username: string;
+    author: string;
     text: string;
     tags: string[];
     datetime: any;

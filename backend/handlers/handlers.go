@@ -40,9 +40,9 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		conditions = append(conditions, bson.M{"tags": bson.M{"$in": tags}})
 	}
 
-	usernames := req.Usernames
-	if len(usernames) > 0 {
-		conditions = append(conditions, bson.M{"username": bson.M{"$in": usernames}})
+	authors := req.Authors
+	if len(authors) > 0 {
+		conditions = append(conditions, bson.M{"author": bson.M{"$in": authors}})
 	}
 
 	// Set page limit (default 10)
@@ -194,8 +194,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.ValidatePost(newPost); err != nil {
-		log.Printf("Missing title or username in post: %v", err)
-		http.Error(w, "Missing title or username in post", http.StatusBadRequest)
+		log.Printf("Missing title or author in post: %v", err)
+		http.Error(w, "Missing title or author in post", http.StatusBadRequest)
 		return
 	}
 

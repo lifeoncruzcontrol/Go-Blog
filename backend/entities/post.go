@@ -9,7 +9,7 @@ import (
 type Post struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
 	Title    string             `json:"title"`
-	Username string             `json:"username"`
+	Author   string             `json:"author"`
 	Text     string             `json:"text"`
 	Tags     []string           `json:"tags" bson:"tags"`
 	Datetime time.Time          `json:"datetime"`
@@ -27,7 +27,7 @@ type UpdateText struct {
 
 type FilterRequest struct {
 	Tags       []string `json:"tags"`
-	Usernames  []string `json:"usernames"`
+	Authors    []string `json:"authors"`
 	Limit      int      `json:"limit"`
 	NextCursor string   `json:"nextcursor"`
 }
