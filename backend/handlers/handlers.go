@@ -104,6 +104,13 @@ func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var currCursor string
+	if req.NextCursor != "" {
+		currCursor = req.NextCursor
+	} else {
+		currCursor = ""
+	}
+
 	// Determine next cursor (last document's _id)
 	var nextCursor string
 	if len(results) > 0 {
@@ -115,6 +122,7 @@ func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 		Data: results,
 		Pagination: entities.Pagination{
 			Limit:          limit,
+			CurrCursor:     currCursor,
 			NextCursor:     nextCursor,
 			TotalDocuments: totalDocuments,
 			TotalPages:     totalPages,

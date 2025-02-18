@@ -34,6 +34,7 @@ type FilterRequest struct {
 
 type Pagination struct {
 	Limit          int    `json:"limit"`
+	CurrCursor     string `json:"currcursor"`
 	NextCursor     string `json:"nextCursor"`
 	TotalDocuments int64  `json:"totalDocuments"`
 	TotalPages     int    `json:"totalPages"`
