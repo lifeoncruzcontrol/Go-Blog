@@ -57,7 +57,7 @@ const BlogPage: React.FC = () => {
   
     // Handle form submission
     const handleSubmit = async () => {
-      const newPost = { 
+      let newPost: BlogPost = { 
         title, 
         text, 
         author, 
@@ -71,7 +71,13 @@ const BlogPage: React.FC = () => {
         });
   
         if (response.ok) {
-          fetchPosts(); // Refresh the posts
+          const responseData = await response.json();
+          newPost = {
+            ...newPost,
+            id: responseData.id,
+            datetime: responseData.datetime
+          }
+          addPost(newPost)
           setOpen(false); // Close modal
           setTitle("");
           setText("");
