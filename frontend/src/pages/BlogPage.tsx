@@ -24,7 +24,7 @@ const BlogPage: React.FC = () => {
     // Form states for creating a new post
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
-    const [username, setUsername] = useState("");
+    const [author, setAuthor] = useState("");
     const [tags, setTags] = useState("");
     const [snackbarMsg, setSnackbarMsg] = useState<string>("");
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
@@ -50,7 +50,7 @@ const BlogPage: React.FC = () => {
       const newPost = { 
         title, 
         text, 
-        username, 
+        author, 
         tags: tags.split(",").map(tag => tag.trim())  // Convert string to array
       };
       try {
@@ -65,7 +65,7 @@ const BlogPage: React.FC = () => {
           setOpen(false); // Close modal
           setTitle("");
           setText("");
-          setUsername("");
+          setAuthor("");
           setTags("");
           setSnackbarMsg("Post created successfully!");
           setOpenSnackbar(true);
@@ -114,7 +114,7 @@ const BlogPage: React.FC = () => {
                 </Box>
                   <CardContent>
                     <Typography variant="h5">{post.title}</Typography>
-                    <Typography variant="body2" color="textSecondary">{post.username}</Typography>
+                    <Typography variant="body2" color="textSecondary">{post.author}</Typography>
                     <Typography variant="body2">{new Date(post.datetime).toDateString()}</Typography>
                     <Typography variant="body1">{post.text.substring(0, 100)}...</Typography>
                     {post.tags?.length > 0 && (
@@ -135,7 +135,7 @@ const BlogPage: React.FC = () => {
           <Box sx={{ width: 400, p: 3, bgcolor: "background.paper", mx: "auto", mt: 10, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom>Create a New Post</Typography>
             <TextField label="Title" fullWidth sx={{ mb: 2 }} value={title} onChange={(e) => setTitle(e.target.value)} />
-            <TextField label="Username" fullWidth sx={{ mb: 2 }} value={username} onChange={(e) => setUsername(e.target.value)} />
+            <TextField label="Author" fullWidth sx={{ mb: 2 }} value={author} onChange={(e) => setAuthor(e.target.value)} />
             <TextField label="Text" multiline rows={4} fullWidth sx={{ mb: 2 }} value={text} onChange={(e) => setText(e.target.value)} />
             <TextField label="Tags (comma-separated)" fullWidth sx={{ mb: 2 }} value={tags} onChange={(e) => setTags(e.target.value)} />
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
