@@ -22,6 +22,7 @@ const BlogPage: React.FC = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(1);
     const [page, setPage] = useState<number>(1);
+    const [visitedPages, setVisitedPages] = useState<Set<number>>(new Set([0]));
     const [nextCursor, setNextCursor] = useState<string>("");
     const [totalDocuments, setTotalDocuments] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
@@ -68,10 +69,19 @@ const BlogPage: React.FC = () => {
     };
   
     useEffect(() => {
-      fetchPosts(nextCursor);
+      if (!visitedPages.has(page)) {
+        visitPage(page);
+        fetchPosts(nextCursor);
+      } else {
+        // add logic for getting array slice
+      }
     }, [page]);
 
-    const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    const visitPage = (page: number) => {
+      setVisitedPages((prev) => new Set(prev).add(page));
+    };
+
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
       setPage(value);
     };
   
@@ -173,7 +183,7 @@ const BlogPage: React.FC = () => {
           <Pagination 
             count={totalPages} 
             page={page} 
-            onChange={handleChange} 
+            onChange={handlePageChange} 
             sx={{
               "& .MuiPaginationItem-root": { fontSize: { xs: "0.75rem", sm: "1rem" } } // Smaller font on small screens
             }}
