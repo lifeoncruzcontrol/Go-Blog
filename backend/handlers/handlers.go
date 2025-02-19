@@ -72,14 +72,18 @@ func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	totalDocuments, err := db.Posts.CountDocuments(ctx, filter)
-	if err != nil {
-		log.Printf("Error counting total number of matching documents: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	var totalDocuments int64
+	var totalPages int
+	if req.NextCursor == "" {
+		var err error
+		totalDocuments, err = db.Posts.CountDocuments(ctx, filter)
+		if err != nil {
+			log.Printf("Error counting total number of matching documents: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		totalPages = int(math.Ceil(float64(totalDocuments) / float64(limit)))
 	}
-
-	totalPages := int(math.Ceil(float64(totalDocuments) / float64(limit)))
 
 	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.M{"_id": 1})
 
