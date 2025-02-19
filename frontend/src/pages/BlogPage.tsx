@@ -20,6 +20,10 @@ import GetPostsResponse from "../interfaces/GetPostsResponse";
 const BlogPage: React.FC = () => {
     const [getPostsResponse, setGetPostsResponse] = useState<GetPostsResponse | null>(null);
     const [posts, setPosts] = useState<BlogPost[]>([]);
+    const [limit, setLimit] = useState<number>(1);
+    const [nextCursor, setNextCursor] = useState<string>("");
+    const [totalDocuments, setTotalDocuments] = useState<number>(1);
+    const [totalPages, setTotalPages] = useState<number>(1);
     const [open, setOpen] = useState(false);
     
     // Form states for creating a new post
@@ -42,6 +46,10 @@ const BlogPage: React.FC = () => {
   
         setGetPostsResponse(res);
         setPosts(res.data);
+        setLimit(res.limit);
+        setNextCursor(res.pagination.nextCursor);
+        setTotalDocuments(res.pagination.totalDocuments);
+        setTotalPages(res.pagination.totalPages)
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
