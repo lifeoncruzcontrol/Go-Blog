@@ -10,7 +10,8 @@ import {
   TextField,
   Snackbar,
   Alert,
-  IconButton
+  IconButton,
+  Pagination
 } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -20,6 +21,7 @@ import GetPostsResponse from "../interfaces/GetPostsResponse";
 const BlogPage: React.FC = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(1);
+    const [page, setPage] = useState<number>(1);
     const [nextCursor, setNextCursor] = useState<string>("");
     const [totalDocuments, setTotalDocuments] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
@@ -42,9 +44,12 @@ const BlogPage: React.FC = () => {
     };
 
     // Fetch posts from the backend
-    const fetchNewPosts = async () => {
+    const fetchPosts = async (cursor: string) => {
       try {
-        const response = await fetch("http://127.0.0.1:8080/posts/filter");
+        const response = await fetch("http://127.0.0.1:8080/posts/filter", {
+          method: "POST",
+          body: JSON.stringify({ nextCursor: cursor })
+        });
         const res: GetPostsResponse = await response.json();
         setPosts(res.data);
         if (res.pagination.limit) {
@@ -63,8 +68,12 @@ const BlogPage: React.FC = () => {
     };
   
     useEffect(() => {
-      fetchNewPosts();
-    }, []);
+      fetchPosts(nextCursor);
+    }, [page]);
+
+    const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+      setPage(value);
+    };
   
     // Handle form submission
     const handleSubmit = async () => {
@@ -152,6 +161,25 @@ const BlogPage: React.FC = () => {
           )}
 
         </Grid2>
+
+        <Box 
+          sx={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            mt: 3, 
+            width: "100%" 
+          }}
+        >
+          <Pagination 
+            count={totalPages} 
+            page={page} 
+            onChange={handleChange} 
+            sx={{
+              "& .MuiPaginationItem-root": { fontSize: { xs: "0.75rem", sm: "1rem" } } // Smaller font on small screens
+            }}
+          />
+        </Box>
+
   
         {/* Create Post Modal */}
         <Modal open={open} onClose={() => setOpen(false)}>
