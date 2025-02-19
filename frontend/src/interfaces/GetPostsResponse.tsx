@@ -4,7 +4,7 @@ interface GetPostsResponse {
     data: BlogPost[];
     pagination: {
         limit: number | null,
-        currCcursor: string,
+        currCursor: string,
         nextCursor: string,
         totalDocuments: number | null,
         totalPages: number | null
