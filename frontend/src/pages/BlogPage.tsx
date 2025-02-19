@@ -46,6 +46,10 @@ const BlogPage: React.FC = () => {
         console.error("Error fetching posts:", error);
       }
     };
+
+    const removePost = (id: string) => {
+      setPosts(posts.filter((post) => post.id !== id));
+    };
   
     useEffect(() => {
       fetchPosts();
@@ -90,11 +94,7 @@ const BlogPage: React.FC = () => {
           setSnackbarMsg("Post deleted successfully!");
           setOpenSnackbar(true);
           
-          setGetPostsResponse((prevPosts) =>
-            prevPosts
-              ? { ...prevPosts, data: prevPosts.data.filter((post) => post.id !== postId) }
-              : prevPosts
-          );          
+          removePost(postId);
         }
       } catch (err) {
         console.error("Error trying to delete post: ", err);
