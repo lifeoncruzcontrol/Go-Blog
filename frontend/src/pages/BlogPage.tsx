@@ -18,7 +18,6 @@ import BlogPost from "../interfaces/BlogPost";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
 const BlogPage: React.FC = () => {
-    const [getPostsResponse, setGetPostsResponse] = useState<GetPostsResponse | null>(null);
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(1);
     const [nextCursor, setNextCursor] = useState<string>("");
@@ -38,25 +37,23 @@ const BlogPage: React.FC = () => {
       setPosts((prevPosts) => [...prevPosts, newPost]);
     };
 
+    const removePost = (id: string) => {
+      setPosts(posts.filter((post) => post.id !== id));
+    };
+
     // Fetch posts from the backend
     const fetchPosts = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8080/posts/filter");
-        const res = await response.json();
-  
-        setGetPostsResponse(res);
+        const res: GetPostsResponse = await response.json();
         setPosts(res.data);
         setLimit(res.limit);
         setNextCursor(res.pagination.nextCursor);
         setTotalDocuments(res.pagination.totalDocuments);
-        setTotalPages(res.pagination.totalPages)
+        setTotalPages(res.pagination.totalPages);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
-    };
-
-    const removePost = (id: string) => {
-      setPosts(posts.filter((post) => post.id !== id));
     };
   
     useEffect(() => {
