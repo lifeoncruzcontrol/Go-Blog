@@ -32,7 +32,7 @@ const BlogPage: React.FC = () => {
     // Fetch posts from the backend
     const fetchPosts = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8080/posts");
+        const response = await fetch("http://127.0.0.1:8080/posts/filter");
         const res = await response.json();
   
         setGetPostsResponse(res);
