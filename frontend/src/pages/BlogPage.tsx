@@ -33,9 +33,9 @@ const BlogPage: React.FC = () => {
     const fetchPosts = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8080/posts");
-        const data = await response.json();
+        const res = await response.json();
   
-        setGetPostsResponse(data);
+        setGetPostsResponse(res);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
