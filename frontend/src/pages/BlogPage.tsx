@@ -42,22 +42,28 @@ const BlogPage: React.FC = () => {
     };
 
     // Fetch posts from the backend
-    const fetchPosts = async () => {
+    const fetchNewPosts = async () => {
       try {
         const response = await fetch("http://127.0.0.1:8080/posts/filter");
         const res: GetPostsResponse = await response.json();
         setPosts(res.data);
-        setLimit(res.limit);
+        if (res.pagination.limit) {
+          setLimit(res.pagination.limit);
+        }
+        if (res.pagination.totalDocuments) {
+          setTotalDocuments(res.pagination.totalDocuments);
+        }
+        if (res.pagination.totalPages) {
+          setTotalPages(res.pagination.totalPages);
+        }
         setNextCursor(res.pagination.nextCursor);
-        setTotalDocuments(res.pagination.totalDocuments);
-        setTotalPages(res.pagination.totalPages);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
     };
   
     useEffect(() => {
-      fetchPosts();
+      fetchNewPosts();
     }, []);
   
     // Handle form submission
