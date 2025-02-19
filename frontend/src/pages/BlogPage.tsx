@@ -19,6 +19,7 @@ import GetPostsResponse from "../interfaces/GetPostsResponse";
 
 const BlogPage: React.FC = () => {
     const [getPostsResponse, setGetPostsResponse] = useState<GetPostsResponse | null>(null);
+    const [posts, setPosts] = useState<BlogPost[]>([]);
     const [open, setOpen] = useState(false);
     
     // Form states for creating a new post
@@ -29,6 +30,10 @@ const BlogPage: React.FC = () => {
     const [snackbarMsg, setSnackbarMsg] = useState<string>("");
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   
+    const addPost = (newPost: BlogPost) => {
+      setPosts((prevPosts) => [...prevPosts, newPost]);
+    };
+
     // Fetch posts from the backend
     const fetchPosts = async () => {
       try {
@@ -36,6 +41,7 @@ const BlogPage: React.FC = () => {
         const res = await response.json();
   
         setGetPostsResponse(res);
+        setPosts(res.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -103,8 +109,8 @@ const BlogPage: React.FC = () => {
         </Button>
   
         <Grid2 container spacing={3} sx={{ mt: 2 }}>
-          {getPostsResponse && getPostsResponse.data.length > 0 ? (
-            getPostsResponse.data.map((post: BlogPost) => (
+          {posts && posts.length > 0 ? (
+            posts.map((post: BlogPost) => (
               <Grid2 item xs={12} sm={6} md={4} key={post.id}>
                 <Card sx={{ position: "relative", p: 2 }}>
                 <Box sx={{ position: "absolute", top: 5, right: 5 }}>
