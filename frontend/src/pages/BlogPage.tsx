@@ -19,9 +19,10 @@ import BlogPost from "../interfaces/BlogPost";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
 const BlogPage: React.FC = () => {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
+    const [postsCache, setPostsCache] = useState<BlogPost[]>([]);
+    const [currPosts, setCurrPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(1);
-    const [page, setPage] = useState<number>(1);
+    const [pageNum, setPageNum] = useState<number>(1);
     const [visitedPages, setVisitedPages] = useState<Set<number>>(new Set([0]));
     const [nextCursor, setNextCursor] = useState<string>("");
     const [totalDocuments, setTotalDocuments] = useState<number>(1);
@@ -37,11 +38,11 @@ const BlogPage: React.FC = () => {
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   
     const addPost = (newPost: BlogPost) => {
-      setPosts((prevPosts) => [...prevPosts, newPost]);
+      setPostsCache((prevPostsCache) => [...prevPostsCache, newPost]);
     };
 
     const removePost = (id: string) => {
-      setPosts(posts.filter((post) => post.id !== id));
+      setPostsCache(postsCache.filter((post) => post.id !== id));
     };
 
     // Fetch posts from the backend
@@ -52,7 +53,8 @@ const BlogPage: React.FC = () => {
           body: JSON.stringify({ nextCursor: cursor })
         });
         const res: GetPostsResponse = await response.json();
-        setPosts(res.data);
+
+        setPostsCache((prevPosts) => [...prevPosts, ...res.data]);
         if (res.pagination.limit) {
           setLimit(res.pagination.limit);
         }
@@ -69,20 +71,20 @@ const BlogPage: React.FC = () => {
     };
   
     useEffect(() => {
-      if (!visitedPages.has(page)) {
-        visitPage(page);
+      if (!visitedPages.has(pageNum)) {
+        visitPage(pageNum);
         fetchPosts(nextCursor);
       } else {
-        // add logic for getting array slice
+        setCurrPosts(postsCache.slice(pageNum * limit, (pageNum * limit * 2)));
       }
-    }, [page]);
+    }, [pageNum, postsCache]);
 
     const visitPage = (page: number) => {
       setVisitedPages((prev) => new Set(prev).add(page));
     };
 
     const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-      setPage(value);
+      setPageNum(value);
     };
   
     // Handle form submission
@@ -107,7 +109,7 @@ const BlogPage: React.FC = () => {
             id: responseData.id,
             datetime: responseData.datetime
           }
-          addPost(newPost)
+          addPost(newPost);
           setOpen(false); // Close modal
           setTitle("");
           setText("");
@@ -131,6 +133,11 @@ const BlogPage: React.FC = () => {
           setOpenSnackbar(true);
           
           removePost(postId);
+          setTotalDocuments((prev) => prev - 1);
+          if (totalDocuments % limit === 0) {
+            setTotalPages((prev) => prev - 1);
+            setPageNum((prev) => prev - 1); // go to prev page
+          }
         }
       } catch (err) {
         console.error("Error trying to delete post: ", err);
@@ -145,8 +152,8 @@ const BlogPage: React.FC = () => {
         </Button>
   
         <Grid2 container spacing={3} sx={{ mt: 2 }}>
-          {posts && posts.length > 0 ? (
-            posts.map((post: BlogPost) => (
+          {currPosts && currPosts.length > 0 ? (
+            currPosts.map((post: BlogPost) => (
               <Grid2 item xs={12} sm={6} md={4} key={post.id}>
                 <Card sx={{ position: "relative", p: 2 }}>
                 <Box sx={{ position: "absolute", top: 5, right: 5 }}>
@@ -182,7 +189,7 @@ const BlogPage: React.FC = () => {
         >
           <Pagination 
             count={totalPages} 
-            page={page} 
+            page={pageNum} 
             onChange={handlePageChange} 
             sx={{
               "& .MuiPaginationItem-root": { fontSize: { xs: "0.75rem", sm: "1rem" } } // Smaller font on small screens
