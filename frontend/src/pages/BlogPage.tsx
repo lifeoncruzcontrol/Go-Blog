@@ -9,7 +9,8 @@ import {
   Snackbar,
   Alert,
   IconButton,
-  Pagination
+  Pagination,
+  PaginationItem
 } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -208,14 +209,25 @@ const BlogPage: React.FC = () => {
             width: "100%" 
           }}
         >
-          <Pagination 
-            count={totalPages} 
-            page={pageNum} 
-            onChange={handlePageChange} 
+          <Pagination
+            count={totalPages}
+            page={pageNum}
+            onChange={handlePageChange}
+            renderItem={(item) => (
+              <PaginationItem
+                {...item}
+                disabled={
+                  (item.type === "previous" && pageNum === 1) || // Disable "Previous" on first page
+                  (item.type === "next" && pageNum === totalPages) || // Disable "Next" on last page
+                  (item.page !== pageNum + 1 && item.type !== "next" && !visitedPages.has(item.page)) // Disable unvisited pages (except Next)
+                }
+              />
+            )}
             sx={{
               "& .MuiPaginationItem-root": { fontSize: { xs: "0.75rem", sm: "1rem" } } // Smaller font on small screens
             }}
           />
+
         </Box>
 
   
