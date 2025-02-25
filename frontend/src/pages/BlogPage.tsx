@@ -25,7 +25,6 @@ const BlogPage: React.FC = () => {
     const [pageNum, setPageNum] = useState<number>(1);
     const [visitedPages, setVisitedPages] = useState<Set<number>>(new Set([0]));
     const [nextCursorMap, setNextCursorMap] = useState<Map<number, string>>(new Map());
-    const [nextCursor, setNextCursor] = useState<string>("");
     const [totalDocuments, setTotalDocuments] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [open, setOpen] = useState(false);
@@ -78,12 +77,6 @@ const BlogPage: React.FC = () => {
       }
     };
 
-    
-
-    const visitPage = (page: number) => {
-      setVisitedPages((prev) => new Set(prev).add(page));
-    };
-
     useEffect(() => {
       if (!visitedPages.has(pageNum)) {
         fetchPosts(pageNum);
@@ -92,6 +85,15 @@ const BlogPage: React.FC = () => {
       const startIdx = (pageNum - 1) * limit;
       const endIdx = startIdx + limit;
       setCurrPosts(postsCache.slice(startIdx, endIdx));
+
+      const newTotalPages = Math.ceil(postsCache.length / limit);
+
+      // If the current page is now empty, navigate to the previous page
+      if (pageNum > newTotalPages) {
+        setPageNum(Math.max(1, newTotalPages)); // Ensures we don't go below page 1
+      }
+    
+      setTotalPages(newTotalPages); // Update pagination display
     }, [pageNum, postsCache]);
     
   
