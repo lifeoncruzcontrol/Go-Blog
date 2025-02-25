@@ -5,9 +5,7 @@ import {
   Card,
   CardContent,
   Button,
-  Modal,
   Box,
-  TextField,
   Snackbar,
   Alert,
   IconButton,
@@ -68,7 +66,7 @@ const BlogPage: React.FC = () => {
   
         setLimit(res.pagination.limit || limit);
         setTotalDocuments(res.pagination.totalDocuments || totalDocuments);
-        setTotalPages(res.pagination.totalPages || totalPages);
+        setTotalPages(Math.ceil(totalDocuments / limit));
   
         // Store nextCursor for the current page
         setNextCursorMap((prev) => new Map(prev).set(page, res.pagination.nextCursor || ""));
@@ -87,7 +85,7 @@ const BlogPage: React.FC = () => {
       const endIdx = startIdx + limit;
       setCurrPosts(postsCache.slice(startIdx, endIdx));
 
-      const newTotalPages = Math.ceil(postsCache.length / limit);
+      const newTotalPages = Math.ceil(totalDocuments / limit);
 
       // If the current page is now empty, navigate to the previous page
       if (pageNum > newTotalPages) {
@@ -148,6 +146,10 @@ const BlogPage: React.FC = () => {
           removePost(postId);
           setTotalDocuments((prev) => prev - 1);
           if ((currPosts.length === 1 || currPosts.length === 0) && pageNum > 1) {
+            const updatedSet = new Set(visitedPages);
+            updatedSet.delete(pageNum);
+            setVisitedPages(updatedSet);
+            
             setPageNum((prev) => prev - 1);
           }
           setSnackbarMsg("Post deleted successfully!");
