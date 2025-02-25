@@ -21,9 +21,10 @@ import GetPostsResponse from "../interfaces/GetPostsResponse";
 const BlogPage: React.FC = () => {
     const [postsCache, setPostsCache] = useState<BlogPost[]>([]);
     const [currPosts, setCurrPosts] = useState<BlogPost[]>([]);
-    const [limit, setLimit] = useState<number>(1);
+    const [limit, setLimit] = useState<number>(10);
     const [pageNum, setPageNum] = useState<number>(1);
     const [visitedPages, setVisitedPages] = useState<Set<number>>(new Set([0]));
+    const [nextCursorMap, setNextCursorMap] = useState<Map<number, string>>(new Map());
     const [nextCursor, setNextCursor] = useState<string>("");
     const [totalDocuments, setTotalDocuments] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
@@ -46,54 +47,65 @@ const BlogPage: React.FC = () => {
     };
 
     // Fetch posts from the backend
-    const fetchPosts = async (cursor: string) => {
+    const fetchPosts = async (page: number) => {
       try {
+        const cursor = nextCursorMap.get(page - 1) || "";
+  
         const response = await fetch("http://127.0.0.1:8080/posts/filter", {
           method: "POST",
-          body: JSON.stringify({ nextCursor: cursor })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nextCursor: cursor, limit }),
         });
+  
         const res: GetPostsResponse = await response.json();
-
-        setPostsCache((prevPosts) => [...prevPosts, ...res.data]);
-        if (res.pagination.limit) {
-          setLimit(res.pagination.limit);
-        }
-        if (res.pagination.totalDocuments) {
-          setTotalDocuments(res.pagination.totalDocuments);
-        }
-        if (res.pagination.totalPages) {
-          setTotalPages(res.pagination.totalPages);
-        }
-        setNextCursor(res.pagination.nextCursor);
+        if (!res.data || res.data.length === 0) return;
+  
+        // Append new posts to cache, ensuring uniqueness
+        setPostsCache((prev) => {
+          const newPosts = res.data.filter((post) => !prev.some((p) => p.id === post.id));
+          return [...prev, ...newPosts];
+        });
+  
+        setLimit(res.pagination.limit || limit);
+        setTotalDocuments(res.pagination.totalDocuments || totalDocuments);
+        setTotalPages(res.pagination.totalPages || totalPages);
+  
+        // Store nextCursor for the current page
+        setNextCursorMap((prev) => new Map(prev).set(page, res.pagination.nextCursor || ""));
+        setVisitedPages((prev) => new Set(prev).add(page));
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
     };
-  
-    useEffect(() => {
-      if (!visitedPages.has(pageNum)) {
-        visitPage(pageNum);
-        fetchPosts(nextCursor);
-      } else {
-        setCurrPosts(postsCache.slice(pageNum * limit, (pageNum * limit * 2)));
-      }
-    }, [pageNum, postsCache]);
+
+    
 
     const visitPage = (page: number) => {
       setVisitedPages((prev) => new Set(prev).add(page));
     };
 
+    useEffect(() => {
+      if (!visitedPages.has(pageNum)) {
+        fetchPosts(pageNum);
+      }
+      
+      const startIdx = (pageNum - 1) * limit;
+      const endIdx = startIdx + limit;
+      setCurrPosts(postsCache.slice(startIdx, endIdx));
+    }, [pageNum, postsCache]);
+    
+  
     const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
       setPageNum(value);
     };
   
     // Handle form submission
     const handleSubmit = async () => {
-      let newPost: BlogPost = { 
-        title, 
-        text, 
-        author, 
-        tags: tags.split(",").map(tag => tag.trim())  // Convert string to array
+      let newPost: BlogPost = {
+        title,
+        text,
+        author,
+        tags: tags.split(",").map((tag) => tag.trim()),
       };
       try {
         const response = await fetch("http://127.0.0.1:8080/posts", {
@@ -107,10 +119,10 @@ const BlogPage: React.FC = () => {
           newPost = {
             ...newPost,
             id: responseData.id,
-            datetime: responseData.datetime
-          }
+            datetime: responseData.datetime,
+          };
           addPost(newPost);
-          setOpen(false); // Close modal
+          setOpen(false);
           setTitle("");
           setText("");
           setAuthor("");
@@ -126,21 +138,20 @@ const BlogPage: React.FC = () => {
     const handleDelete = async (postId: string) => {
       try {
         const res = await fetch(`http://127.0.0.1:8080/posts?id=${postId}`, {
-          method: "DELETE"
+          method: "DELETE",
         });
+  
         if (res.ok) {
-          setSnackbarMsg("Post deleted successfully!");
-          setOpenSnackbar(true);
-          
           removePost(postId);
           setTotalDocuments((prev) => prev - 1);
-          if (totalDocuments % limit === 0) {
-            setTotalPages((prev) => prev - 1);
-            setPageNum((prev) => prev - 1); // go to prev page
+          if ((currPosts.length === 1 || currPosts.length === 0) && pageNum > 1) {
+            setPageNum((prev) => prev - 1);
           }
+          setSnackbarMsg("Post deleted successfully!");
+          setOpenSnackbar(true);
         }
       } catch (err) {
-        console.error("Error trying to delete post: ", err);
+        console.error("Error trying to delete post:", err);
       }
     };
   
