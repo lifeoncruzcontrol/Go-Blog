@@ -123,6 +123,11 @@ const BlogPage: React.FC = () => {
             datetime: responseData.datetime,
           };
           addPost(newPost);
+          setTotalDocuments((prev) => {
+            const newTotalDocs = prev + 1;
+            setTotalPages(Math.ceil(newTotalDocs / limit)); // Recalculate total pages
+            return newTotalDocs;
+          });
           setOpen(false);
           setTitle("");
           setText("");
