@@ -3,10 +3,10 @@ import BlogPost from "./BlogPost";
 interface GetPostsResponse {
     data: BlogPost[];
     pagination: {
-        limit: number,
+        limit: number | null,
         nextCursor: string,
-        totalDocuments: number,
-        totalPages: number
+        totalDocuments: number | null,
+        totalPages: number | null
     }
 }
 

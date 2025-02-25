@@ -9,7 +9,7 @@ import (
 type Post struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id"`
 	Title    string             `json:"title"`
-	Username string             `json:"username"`
+	Author   string             `json:"author"`
 	Text     string             `json:"text"`
 	Tags     []string           `json:"tags" bson:"tags"`
 	Datetime time.Time          `json:"datetime"`
@@ -26,8 +26,21 @@ type UpdateText struct {
 }
 
 type FilterRequest struct {
-	Tags      []string `json:"tags"`
-	Usernames []string `json:"usernames"`
-	Limit     int      `json:"limit"`
-	LastID    string   `json:"lastid"`
+	Tags       []string `json:"tags"`
+	Authors    []string `json:"authors"`
+	Limit      int      `json:"limit"`
+	NextCursor string   `json:"nextcursor"`
+}
+
+type Pagination struct {
+	Limit          int    `json:"limit"`
+	CurrCursor     string `json:"currcursor"`
+	NextCursor     string `json:"nextCursor"`
+	TotalDocuments int64  `json:"totalDocuments,omitempty"`
+	TotalPages     int    `json:"totalPages,omitempty"`
+}
+
+type Response struct {
+	Data       []Post     `json:"data"`
+	Pagination Pagination `json:"pagination"`
 }

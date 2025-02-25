@@ -19,7 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
+func FilterPostsHandler(w http.ResponseWriter, r *http.Request) {
 	var req entities.FilterRequest
 
 	if r.Body == nil || r.ContentLength == 0 {
@@ -40,9 +40,9 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		conditions = append(conditions, bson.M{"tags": bson.M{"$in": tags}})
 	}
 
-	usernames := req.Usernames
-	if len(usernames) > 0 {
-		conditions = append(conditions, bson.M{"username": bson.M{"$in": usernames}})
+	authors := req.Authors
+	if len(authors) > 0 {
+		conditions = append(conditions, bson.M{"author": bson.M{"$in": authors}})
 	}
 
 	// Set page limit (default 10)
@@ -52,8 +52,8 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Handle cursor pagination
-	if req.LastID != "" {
-		lastObjectID, err := primitive.ObjectIDFromHex(req.LastID)
+	if req.NextCursor != "" {
+		lastObjectID, err := primitive.ObjectIDFromHex(req.NextCursor)
 		if err != nil {
 			log.Printf("Error converting ID to valid hex format: %v", err)
 			http.Error(w, "Invalid ID format", http.StatusBadRequest)
@@ -72,14 +72,18 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	totalDocuments, err := db.Posts.CountDocuments(ctx, filter)
-	if err != nil {
-		log.Printf("Error counting total number of matching documents: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+	var totalDocuments int64
+	var totalPages int
+	if req.NextCursor == "" {
+		var err error
+		totalDocuments, err = db.Posts.CountDocuments(ctx, filter)
+		if err != nil {
+			log.Printf("Error counting total number of matching documents: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		totalPages = int(math.Ceil(float64(totalDocuments) / float64(limit)))
 	}
-
-	totalPages := int(math.Ceil(float64(totalDocuments) / float64(limit)))
 
 	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.M{"_id": 1})
 
@@ -111,13 +115,13 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		nextCursor = lastDoc.ID.Hex()
 	}
 
-	res := map[string]interface{}{
-		"data": results,
-		"pagination": map[string]interface{}{
-			"limit":          limit,
-			"nextCursor":     nextCursor,
-			"totalDocuments": totalDocuments,
-			"totalPages":     totalPages,
+	res := entities.Response{
+		Data: results,
+		Pagination: entities.Pagination{
+			Limit:          limit,
+			NextCursor:     nextCursor,
+			TotalDocuments: totalDocuments,
+			TotalPages:     totalPages,
 		},
 	}
 
@@ -194,8 +198,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validation.ValidatePost(newPost); err != nil {
-		log.Printf("Missing title or username in post: %v", err)
-		http.Error(w, "Missing title or username in post", http.StatusBadRequest)
+		log.Printf("Missing title or author in post: %v", err)
+		http.Error(w, "Missing title or author in post", http.StatusBadRequest)
 		return
 	}
 

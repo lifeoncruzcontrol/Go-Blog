@@ -44,8 +44,6 @@ func main() {
 				handlers.GetPostByIDHandler(w, r)
 				return
 			}
-
-			handlers.GetPostsHandler(w, r)
 		case http.MethodPatch:
 			handlers.PatchTextByIdHandler(w, r)
 		case http.MethodDelete:
@@ -56,6 +54,10 @@ func main() {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
+	})
+
+	mux.HandleFunc("/posts/filter", func(w http.ResponseWriter, r *http.Request) {
+		handlers.FilterPostsHandler(w, r)
 	})
 
 	handler := cors.New(cors.Options{

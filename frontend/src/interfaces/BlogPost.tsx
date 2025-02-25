@@ -1,10 +1,10 @@
 interface BlogPost {
-    id: string;
+    id?: string;
     title: string;
-    username: string;
+    author: string;
     text: string;
     tags: string[];
-    dateTime: any;
+    datetime?: string;
 }
 
 export default BlogPost;
