@@ -5,20 +5,20 @@ import {
   Card,
   CardContent,
   Button,
-  Modal,
   Box,
-  TextField,
   Snackbar,
   Alert,
   IconButton,
-  Pagination
+  Pagination,
+  PaginationItem
 } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BlogPost from "../interfaces/BlogPost";
+import BlogModal from "../components/BlogModal";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
-const BlogPage: React.FC = () => {
+const BlogGrid: React.FC = () => {
     const [postsCache, setPostsCache] = useState<BlogPost[]>([]);
     const [currPosts, setCurrPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(10);
@@ -67,7 +67,7 @@ const BlogPage: React.FC = () => {
   
         setLimit(res.pagination.limit || limit);
         setTotalDocuments(res.pagination.totalDocuments || totalDocuments);
-        setTotalPages(res.pagination.totalPages || totalPages);
+        setTotalPages(Math.ceil(totalDocuments / limit));
   
         // Store nextCursor for the current page
         setNextCursorMap((prev) => new Map(prev).set(page, res.pagination.nextCursor || ""));
@@ -86,7 +86,7 @@ const BlogPage: React.FC = () => {
       const endIdx = startIdx + limit;
       setCurrPosts(postsCache.slice(startIdx, endIdx));
 
-      const newTotalPages = Math.ceil(postsCache.length / limit);
+      const newTotalPages = Math.ceil(totalDocuments / limit);
 
       // If the current page is now empty, navigate to the previous page
       if (pageNum > newTotalPages) {
@@ -124,6 +124,11 @@ const BlogPage: React.FC = () => {
             datetime: responseData.datetime,
           };
           addPost(newPost);
+          setTotalDocuments((prev) => {
+            const newTotalDocs = prev + 1;
+            setTotalPages(Math.ceil(newTotalDocs / limit)); // Recalculate total pages
+            return newTotalDocs;
+          });
           setOpen(false);
           setTitle("");
           setText("");
@@ -147,6 +152,10 @@ const BlogPage: React.FC = () => {
           removePost(postId);
           setTotalDocuments((prev) => prev - 1);
           if ((currPosts.length === 1 || currPosts.length === 0) && pageNum > 1) {
+            const updatedSet = new Set(visitedPages);
+            updatedSet.delete(pageNum);
+            setVisitedPages(updatedSet);
+            
             setPageNum((prev) => prev - 1);
           }
           setSnackbarMsg("Post deleted successfully!");
@@ -200,28 +209,43 @@ const BlogPage: React.FC = () => {
             width: "100%" 
           }}
         >
-          <Pagination 
-            count={totalPages} 
-            page={pageNum} 
-            onChange={handlePageChange} 
+          <Pagination
+            count={totalPages}
+            page={pageNum}
+            onChange={handlePageChange}
+            renderItem={(item) => (
+              <PaginationItem
+                {...item}
+                disabled={
+                  (item.type === "previous" && pageNum === 1) || // Disable "Previous" on first page
+                  (item.type === "next" && pageNum === totalPages) || // Disable "Next" on last page
+                  (item.page !== pageNum + 1 && item.type !== "next" && !visitedPages.has(item.page)) // Disable unvisited pages (except Next)
+                }
+              />
+            )}
             sx={{
               "& .MuiPaginationItem-root": { fontSize: { xs: "0.75rem", sm: "1rem" } } // Smaller font on small screens
             }}
           />
+
         </Box>
 
   
         {/* Create Post Modal */}
-        <Modal open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 400, p: 3, bgcolor: "background.paper", mx: "auto", mt: 10, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>Create a New Post</Typography>
-            <TextField label="Title" fullWidth sx={{ mb: 2 }} value={title} onChange={(e) => setTitle(e.target.value)} />
-            <TextField label="Author" fullWidth sx={{ mb: 2 }} value={author} onChange={(e) => setAuthor(e.target.value)} />
-            <TextField label="Text" multiline rows={4} fullWidth sx={{ mb: 2 }} value={text} onChange={(e) => setText(e.target.value)} />
-            <TextField label="Tags (comma-separated)" fullWidth sx={{ mb: 2 }} value={tags} onChange={(e) => setTags(e.target.value)} />
-            <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
-          </Box>
-        </Modal>
+        <BlogModal
+          open={open}
+          onClose={() => setOpen(false)}
+          modalTitle = "Create New Post"
+          title={title}
+          author={author}
+          text={text}
+          tags={tags}
+          setTitle={setTitle}
+          setAuthor={setAuthor}
+          setText={setText}
+          setTags={setTags}
+          handleSubmit={handleSubmit}
+          />
         {/* Snackbar for success message */}
         <Snackbar 
             open={openSnackbar} 
@@ -236,4 +260,4 @@ const BlogPage: React.FC = () => {
     );
   };
   
-export default BlogPage;
+export default BlogGrid;
