@@ -18,7 +18,7 @@ import BlogPost from "../interfaces/BlogPost";
 import BlogModal from "../components/BlogModal";
 import GetPostsResponse from "../interfaces/GetPostsResponse";
 
-const BlogPage: React.FC = () => {
+const BlogGrid: React.FC = () => {
     const [postsCache, setPostsCache] = useState<BlogPost[]>([]);
     const [currPosts, setCurrPosts] = useState<BlogPost[]>([]);
     const [limit, setLimit] = useState<number>(10);
@@ -260,4 +260,4 @@ const BlogPage: React.FC = () => {
     );
   };
   
-export default BlogPage;
+export default BlogGrid;

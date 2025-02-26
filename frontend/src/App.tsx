@@ -1,5 +1,5 @@
 import Navbar from './components/Navbar';
-import BlogPage from './pages/BlogPage';
+import BlogGrid from './pages/BlogGrid';
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import './App.css'
 
@@ -10,7 +10,7 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<BlogPage />} />
+        <Route path="/" element={<BlogGrid />} />
       </Routes>
     </Router>
     </>
