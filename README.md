@@ -3,6 +3,12 @@ Project 1 from https://roadmap.sh/backend/project-ideas to review Go and self-te
 
 Backend:
 
+Make sure you create an `.env` file in your `backend` directory. Variables the `compose.yml` file will be looking for are:
+- DB_PORT
+- DATABASE
+- APP_PORT
+- MONGO_URI
+
 To run:
 - Run `docker compose up --build` in `backend` directory
 
